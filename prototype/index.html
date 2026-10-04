@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Surely — Prototype</title>
+<title>Surely — Prototype (Discord rail redo)</title>
 <style>
 :root{
   --bg:#FAF7F2; --surface:#FFFFFF; --ink:#1B1712; --ink2:#6E655A;
@@ -25,17 +25,35 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
   display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:16px}
 .num,.money{font-variant-numeric:tabular-nums}
 .stage{display:flex;gap:24px;align-items:flex-start;justify-content:center;width:100%}
+/* ---- phone: slim rail + main column (Discord mobile pattern) ---- */
 .phone{position:relative;width:390px;height:min(880px,100vh);background:var(--bg);
-  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+  overflow:hidden;display:flex;flex-direction:row;box-shadow:0 24px 80px rgba(0,0,0,.45)}
 @media(max-width:819px){.phone{height:100vh;width:100%;max-width:430px}}
-.rail{display:none;flex-direction:column;align-items:center;gap:14px;padding:22px 12px;
+.prail{width:64px;flex:none;background:#211c16;display:flex;flex-direction:column;align-items:center;
+  padding:14px 0;gap:10px;position:relative;z-index:30}
+.pc{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;position:relative;flex:none;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;
+  font-size:16px;color:#fff;transition:border-radius .18s}
+.pc:hover{border-radius:16px}
+.pc.home{background:var(--brand);font-size:21px}
+.pc.util{background:#3a332b;color:#F5F1EA;font-style:normal;font-size:19px;font-family:var(--sans)}
+.pc.add{background:transparent;border:2px dashed #5a5145;color:#a89e90;font-style:normal;font-size:22px;font-family:var(--sans)}
+.pc.active::before{content:'';position:absolute;left:-13px;top:9px;bottom:9px;width:4px;border-radius:2px;background:#F5F1EA}
+.pc .pbadge{position:absolute;right:-5px;bottom:-5px;min-width:20px;height:20px;border-radius:10px;
+  background:var(--brand);color:#fff;font-family:var(--sans);font-style:normal;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #211c16;font-variant-numeric:tabular-nums}
+.pc .pbadge.emg{background:var(--emergency)}
+.pdiv{width:26px;height:1px;background:#4a4238;flex:none}
+.pspacer{flex:1;min-height:8px}
+/* desktop mirror rail (outside the phone) */
+.rail{display:none;flex-direction:column;align-items:center;gap:10px;padding:18px 12px;
   background:#211c16;border-radius:20px;margin-top:40px}
 @media(min-width:820px){.rail{display:flex}}
-.rail .rc{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-style:italic;font-size:18px;color:#fff;cursor:pointer;
-  border:3px solid transparent;transition:border-color .2s}
-.rail .rc.active{border-color:#F07B3A}
-.rail .rdiv{width:28px;height:1px;background:#4a4238}
+.rail .pc{width:52px;height:52px;font-size:18px}
+.rail .pc.active::before{left:-14px}
+.rail .pc.util{font-size:21px}.rail .pc.add{font-size:24px}
+/* ---- main column ---- */
+.pmain{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;overflow:hidden}
 .splash{position:absolute;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:14px;transition:opacity .4s}
 .splash.hide{opacity:0;pointer-events:none}
@@ -51,22 +69,23 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
   display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:18px}
 .push b{font-size:14px}.push p{font-size:13px;color:var(--ink2);margin-top:2px}
 .push .now{font-size:11px;color:var(--ink2);margin-left:auto;flex:none}
-.hdr{padding:14px 16px 8px;border-bottom:1px solid var(--hairline);background:var(--bg);z-index:20}
+.hdr{padding:14px 16px 8px;border-bottom:1px solid var(--hairline);background:var(--bg);z-index:20;flex:none}
 .hdr .row1{display:flex;align-items:center;justify-content:space-between}
 .hdr .icons{display:flex;gap:6px;align-items:center}
 .iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--hairline);background:var(--surface);
   color:var(--ink);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ctxbar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 10px;background:var(--surface);
-  border:1px solid var(--hairline);border-radius:14px;cursor:pointer;width:100%;text-align:left;color:var(--ink)}
-.hcircle{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-style:italic;font-size:15px;color:#fff}
-.ctxbar .nm{font-weight:600;font-size:15px}.ctxbar .sub{font-size:12px;color:var(--ink2)}
-.ctxbar .chev{margin-left:auto;color:var(--ink2);font-size:18px}
+/* property channel-list header */
+.chdr{padding:12px 16px;border-bottom:1px solid var(--hairline);background:var(--bg);z-index:20;flex:none;
+  display:flex;align-items:center;gap:10px}
+.chdr .hcircle{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:14px;color:#fff}
+.chdr .nm{font-weight:600;font-size:16px}.chdr .sub{font-size:12px;color:var(--ink2)}
+.chdr .iconbtn{margin-left:auto}
 .viewport{flex:1;overflow-y:auto;overscroll-behavior:contain;position:relative}
-.view{display:none;padding:16px 16px 120px;animation:fadeUp .2s ease-out}
+.view{display:none;padding:16px 16px 40px;animation:fadeUp .2s ease-out}
 .view.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.view{animation:none}.push{transition:none}.sheet{transition:none}}
+@media(prefers-reduced-motion:reduce){.view{animation:none}.push{transition:none}.sheet{transition:none}.pdot::after{animation:none}}
 .stitle{font-family:var(--serif);font-size:28px;font-weight:400;margin:4px 0 2px}
 .ssub{color:var(--ink2);font-size:14px;margin-bottom:16px}
 .sec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);
@@ -106,17 +125,36 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
   font-size:14px;cursor:pointer;text-decoration:underline;white-space:nowrap}
 .sent-note{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:600;font-size:14px;
   background:var(--ai-tint);border-radius:12px;padding:12px 14px;margin-top:12px}
-.expand-hint{font-size:13px;color:var(--brand);font-weight:600;margin-top:8px}
 .hrow{display:flex;gap:12px;padding:12px 2px;border-bottom:1px solid var(--hairline);align-items:flex-start}
 .hrow .chk{width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;flex:none;
   display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
 .hrow .tx{font-size:14px;line-height:1.45}.hrow .tx .w{color:var(--ink2);font-size:13px;display:block;margin-top:2px}
 .hrow .when{margin-left:auto;font-size:12px;color:var(--ink2);flex:none}
+.earlierbtn{display:block;width:100%;background:none;border:none;color:var(--brand);font-weight:600;
+  font-size:14px;padding:12px;cursor:pointer;font-family:var(--sans)}
 .empty{text-align:center;padding:48px 24px}
 .empty .wordmark{font-size:34px;margin-bottom:8px}
 .empty p{color:var(--ink2);font-size:15px}
+/* ---- channels ---- */
+.chrow{display:flex;align-items:center;gap:12px;width:100%;background:var(--surface);border:1px solid var(--hairline);
+  border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;color:var(--ink);
+  font-family:var(--sans);font-size:15px;text-align:left}
+.chrow .hash{color:var(--ink2);font-weight:700;font-size:17px;flex:none}
+.chrow .tt{font-weight:600;font-size:15px}
+.chrow .ss{font-size:12px;color:var(--ink2);margin-top:1px}
+/* unread attention: channels needing a response highlight in brand orange */
+.chrow.unread{border-color:var(--brand)}
+.chrow.unread .tt{color:var(--brand)}
+.presence{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);flex:none;white-space:nowrap}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--ok);position:relative;flex:none}
+.pdot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--ok);
+  opacity:.5;animation:ping 2.4s ease-out infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.7}70%{transform:scale(1.15);opacity:0}100%{opacity:0}}
+/* ---- thread ---- */
 .crumb{font-size:13px;color:var(--ink2);margin-bottom:10px}
 .crumb b{color:var(--ink)}
+.backlink{background:none;border:none;color:var(--brand);font-weight:600;font-size:13px;cursor:pointer;
+  font-family:var(--sans);padding:2px 0}
 .thread{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
 .bub{max-width:82%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.45}
 .bub.them{background:var(--surface);border:1px solid var(--hairline);align-self:flex-start;border-bottom-left-radius:6px}
@@ -127,7 +165,7 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
 .bub .tm{display:block;font-size:11px;opacity:.65;margin-top:4px}
 .draft{border:1px dashed var(--brand);border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px}
 .draft .dlbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brand);text-transform:uppercase;margin-bottom:6px}
-.takebar{position:sticky;bottom:0;background:var(--bg);padding:10px 16px 18px;border-top:1px solid var(--hairline)}
+.takebar{position:sticky;bottom:0;background:var(--bg);padding:10px 0 18px;border-top:1px solid var(--hairline)}
 .compose{display:none;gap:8px}
 .takebar.taken .compose{display:flex}
 .takebar.taken #takeoverBtn{display:none}
@@ -139,6 +177,9 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
   padding:8px 18px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
 .ruleslink{display:block;text-align:center;font-size:13px;color:var(--brand);margin-top:8px;
   background:none;border:none;cursor:pointer;width:100%}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.chip{border:1px solid var(--hairline);background:var(--surface);border-radius:999px;padding:9px 14px;
+  font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--sans)}
 .photo{border-radius:16px;overflow:hidden;border:1px solid var(--hairline);margin-bottom:14px;background:var(--surface)}
 .photo svg{display:block;width:100%;height:auto}
 .photo .cap{font-size:12px;color:var(--ink2);padding:8px 14px}
@@ -146,13 +187,15 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
 .kv .k{color:var(--ink2)}.kv .v{text-align:right;font-weight:500}
 .vendorcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:14px 16px;margin-top:12px}
 .stickybar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--hairline);
-  padding:12px 16px 20px;display:flex;flex-direction:column;gap:8px}
+  padding:12px 0 20px;display:flex;flex-direction:column;gap:8px}
 .stickybar .row{display:flex;gap:8px}
 .lrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hairline);
   border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;color:var(--ink);width:100%;text-align:left;
   font-family:var(--sans);font-size:15px}
 .lrow .tt{font-weight:600}.lrow .ss{font-size:13px;color:var(--ink2);margin-top:2px}
 .lrow .chev{margin-left:auto;color:var(--ink2)}
+.hcircle{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:15px;color:#fff}
 .pill{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;
   border-radius:999px;border:1px solid var(--hairline);color:var(--ink2);flex:none}
 .pill.pref{color:var(--brand);border-color:var(--brand)}
@@ -166,11 +209,6 @@ body{font-family:var(--sans);background:#2b2620;color:var(--ink);
 .grip{width:40px;height:4px;border-radius:2px;background:var(--hairline);margin:6px auto 14px}
 .sheet h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px}
 .sheet .shsub{font-size:13px;color:var(--ink2);margin-bottom:14px}
-.hsrow{display:flex;align-items:center;gap:12px;padding:12px 4px;width:100%;
-  cursor:pointer;background:none;border:none;border-bottom:1px solid var(--hairline);
-  font-family:var(--sans);color:var(--ink);text-align:left;font-size:15px}
-.hsrow:last-child{border-bottom:none}
-.hsrow .tick{margin-left:auto;color:var(--brand);font-weight:700}
 .field{margin-bottom:12px}
 .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink2)}
 .field input,.field textarea,.field select{width:100%;border:1px solid var(--hairline);border-radius:12px;
@@ -201,13 +239,7 @@ textarea{resize:vertical;min-height:70px}
   font-size:16px;cursor:pointer;flex:none}
 .transcript{background:var(--ai-tint);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;
   font-style:italic;margin-top:8px}
-.tabs{position:absolute;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
-  border-top:1px solid var(--hairline);display:flex;padding:8px 4px calc(10px + env(safe-area-inset-bottom))}
-.tab{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;
-  font-size:11px;color:var(--ink2);cursor:pointer;font-family:var(--sans);font-weight:500;padding:4px}
-.tab .ic{font-size:20px}
-.tab.on{color:var(--brand);font-weight:700}
-.toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);z-index:180;
+.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(20px);z-index:180;
   background:var(--ink);color:var(--bg);font-size:14px;font-weight:500;padding:12px 20px;border-radius:999px;
   opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;max-width:92%}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -216,307 +248,342 @@ textarea{resize:vertical;min-height:70px}
 .hidden{display:none!important}
 .mt8{margin-top:8px}.mt16{margin-top:16px}
 .small{font-size:13px;color:var(--ink2)}
+.linklike{background:none;border:none;color:var(--brand);font-weight:600;font-size:14px;cursor:pointer;
+  font-family:var(--sans);padding:4px 0;margin-bottom:6px}
 </style>
 </head>
 <body>
 <div class="stage">
   <div class="rail" id="rail"></div>
   <div class="phone" id="phone">
-    <div class="splash" id="splash">
-      <div class="wordmark big">Surely</div>
-      <div class="tag">Surely. It'll get done.</div>
-    </div>
-    <div class="push" id="push">
-      <div class="dot">S</div>
-      <div><b>SURELY</b><p>Leak under the kitchen sink &middot; Unit A &mdash; tap to review</p></div>
-      <div class="now">now</div>
-    </div>
-    <div class="hdr">
-      <div class="row1">
-        <div class="wordmark mid">Surely</div>
-        <div class="icons">
-          <button class="iconbtn" id="themeBtn" title="Appearance">&#9790;</button>
-          <button class="iconbtn" id="gearBtn" title="AI settings">&#9881;</button>
-        </div>
+    <nav class="prail" id="prail" aria-label="Properties"></nav>
+    <div class="pmain" id="pmain">
+      <div class="splash" id="splash">
+        <div class="wordmark big">Surely</div>
+        <div class="tag">Surely. It'll get done.</div>
       </div>
-      <button class="ctxbar" id="houseBtn">
-        <div class="hcircle" id="houseCircle">UD</div>
-        <div><div class="nm" id="houseName">Udell Duplex</div><div class="sub" id="houseSub">2 doors &middot; Indianapolis 46208</div></div>
-        <div class="chev">&#8250;</div>
-      </button>
-    </div>
-    <div class="viewport" id="viewport">
-      <!-- TODAY -->
-      <div class="view on" id="v-today">
-        <div class="stitle">Today</div>
-        <div class="ssub" id="todayDate">Sunday, October 4</div>
-        <div id="needsWrap">
-          <div class="sec">Needs you</div>
-          <div id="needs"></div>
-        </div>
-        <div id="emptyWrap" class="hidden">
-          <div class="empty">
-            <div class="wordmark">Surely</div>
-            <p><b>All quiet. Surely's got it.</b></p>
-            <p class="mt8">Nothing needs a decision right now.</p>
+      <div class="push" id="push">
+        <div class="dot">S</div>
+        <div><b>SURELY</b><p>Leak under the kitchen sink &middot; Unit A &mdash; tap to review</p></div>
+        <div class="now">now</div>
+      </div>
+      <div id="hdrToday">
+        <div class="hdr">
+          <div class="row1">
+            <div class="wordmark mid">Surely</div>
+            <div class="icons">
+              <button class="iconbtn" id="themeBtn" title="Appearance">&#9790;</button>
+            </div>
           </div>
         </div>
-        <div class="sec">Handled for you</div>
-        <div id="handled"></div>
       </div>
+      <div id="hdrChan" class="hidden">
+        <div class="chdr">
+          <div class="hcircle" id="chHouseCircle">UD</div>
+          <div><div class="nm" id="chHouseName">Udell Duplex</div><div class="sub" id="chHouseSub">2 doors &middot; Indianapolis 46208</div></div>
+          <button class="iconbtn" id="chInfoBtn" title="Property details">&#9432;</button>
+        </div>
+      </div>
+      <div class="viewport" id="viewport">
+        <!-- TODAY (Surely home circle) -->
+        <div class="view on" id="v-today">
+          <div class="stitle">Today</div>
+          <div class="ssub" id="todayDate">Sunday, October 4</div>
+          <div id="needsWrap">
+            <div class="sec">Needs you</div>
+            <div id="needs"></div>
+          </div>
+          <div id="emptyWrap" class="hidden">
+            <div class="empty">
+              <div class="wordmark">Surely</div>
+              <p><b>All quiet. Surely's got it.</b></p>
+              <p class="mt8">Nothing needs a decision right now.</p>
+            </div>
+          </div>
+          <div class="sec">Handled for you</div>
+          <div id="handled"></div>
+          <button class="earlierbtn hidden" id="earlierBtn"></button>
+        </div>
 
-      <!-- MESSAGES -->
-      <div class="view" id="v-messages">
-        <div class="stitle">Messages</div>
-        <div class="ssub">Every thread, one place. The AI answers first &mdash; you can jump in anytime.</div>
-        <div id="msgList"></div>
-      </div>
+        <!-- CHANNELS (property tapped) -->
+        <div class="view" id="v-channels">
+          <div class="sec" style="margin-top:2px">Tenant chats</div>
+          <div id="chanTenants"></div>
+          <div class="sec">Surely</div>
+          <div id="chanSurely"></div>
+          <p class="small mt8">The AI watches every channel. You only get pinged when there's a decision.</p>
+        </div>
 
-      <!-- THREAD -->
-      <div class="view" id="v-thread">
-        <div class="crumb"><b id="thHouse">Udell Duplex</b> &nbsp;&rsaquo;&nbsp; <span id="thUnit">Unit B</span> &nbsp;&rsaquo;&nbsp; <span id="thName">Marcus Webb</span></div>
-        <div class="stitle" style="font-size:22px" id="thTitle">Rent timing</div>
-        <div class="thread" id="threadBody"></div>
-        <div class="draft hidden" id="aiDraft">
-          <div class="dlbl">AI draft &middot; waiting on you</div>
-          <div id="aiDraftText"></div>
-          <div class="actions"><button class="btn primary sm grow" id="draftApprove">Approve reply</button>
-          <button class="btn ghost sm" id="draftThread">Open in Today</button></div>
-        </div>
-        <div class="takebar" id="takebar">
-          <button class="btn primary block" id="takeoverBtn">Take over</button>
-          <div class="compose">
-            <input class="cfield" id="composeField" placeholder="Type as the Surely number&hellip;">
-            <button class="btn primary" id="sendBtn" style="min-height:48px">Send</button>
+        <!-- THREAD -->
+        <div class="view" id="v-thread">
+          <div class="crumb"><button class="backlink" id="thBack">&#8249; <b id="thHouse">Udell Duplex</b></button> &nbsp;&rsaquo;&nbsp; <span id="thUnit">Unit B</span> &nbsp;&rsaquo;&nbsp; <span id="thName">Marcus Webb</span></div>
+          <div class="stitle" style="font-size:22px" id="thTitle">Rent timing</div>
+          <div class="thread" id="threadBody"></div>
+          <div class="draft hidden" id="aiDraft">
+            <div class="dlbl">AI draft &middot; waiting on you</div>
+            <div id="aiDraftText"></div>
+            <div class="actions"><button class="btn primary sm grow" id="draftApprove">Approve reply</button>
+            <button class="btn ghost sm" id="draftThread">Open in Today</button></div>
           </div>
-          <div class="handback"><button id="handbackBtn">Hand back to AI</button></div>
-          <button class="ruleslink" id="rulesLink">View the house rules the AI follows</button>
-        </div>
-      </div>
-      <!-- TICKET -->
-      <div class="view" id="v-ticket">
-        <div class="crumb"><b>Udell Duplex</b> &nbsp;&rsaquo;&nbsp; Unit A &nbsp;&rsaquo;&nbsp; Ticket #1042</div>
-        <div class="stitle" style="font-size:24px">Leak under the kitchen sink</div>
-        <div class="ssub">Reported by Denise Carter &middot; today, 9:02 AM</div>
-        <div class="photo">
-          <svg viewBox="0 0 358 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tenant photo of water under the kitchen sink">
-            <rect width="358" height="190" fill="#3a332b"/>
-            <rect x="0" y="0" width="358" height="46" fill="#2c2620"/>
-            <rect x="150" y="46" width="58" height="70" rx="6" fill="#8f8a80"/>
-            <rect x="163" y="116" width="32" height="44" fill="#6f6a60"/>
-            <path d="M179 160 q4 12 -6 18" stroke="#7fb3d5" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <circle cx="173" cy="184" r="4" fill="#7fb3d5"/>
-            <ellipse cx="120" cy="172" rx="52" ry="10" fill="#4d6a80" opacity=".8"/>
-            <ellipse cx="250" cy="178" rx="34" ry="8" fill="#4d6a80" opacity=".6"/>
-            <rect x="230" y="60" width="90" height="100" rx="8" fill="#54483c"/>
-            <text x="16" y="176" font-family="sans-serif" font-size="12" fill="#cfc8bd">tenant photo</text>
-          </svg>
-          <div class="cap">Tenant photo &middot; water pooling under the sink cabinet</div>
-        </div>
-        <div class="card urgent"><div class="spine"></div><div class="in">
-          <div class="badge">Urgent</div>
-          <h3 style="font-size:16px">Why this triage</h3>
-          <p class="what">Active drip at a supply line can damage the cabinet and subfloor within hours &mdash; it can't wait for the next visit.</p>
-        </div></div>
-        <div class="vendorcard">
-          <div class="sec" style="margin-top:0">Suggested vendor</div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="hcircle" style="background:#3E7C4F">LH</div>
-            <div><div class="tt" style="font-weight:600">Luis Herrera</div>
-            <div class="ss small">Plumbing &middot; $90/hr &middot; <span class="pill pref">Preferred</span></div></div>
+          <div class="takebar" id="takebar">
+            <button class="btn primary block" id="takeoverBtn">Take over</button>
+            <div class="compose">
+              <input class="cfield" id="composeField" placeholder="Type as the Surely number&hellip;">
+              <button class="btn primary" id="sendBtn" style="min-height:48px">Send</button>
+            </div>
+            <div class="handback"><button id="handbackBtn">Hand back to AI</button></div>
+            <button class="ruleslink" id="rulesLink">View the house rules the AI follows</button>
           </div>
-          <p class="small mt8"><b>Why Luis:</b> fixed this same sink in March, knows the layout, and answers on Sundays.</p>
-          <div class="cost money"><span class="lbl">Estimated cost &mdash; shown before you decide</span>$180&ndash;$240</div>
-          <p class="small mt8">Under your $250 approval limit. You pay Luis directly, as today &mdash; no money moves in the app.</p>
         </div>
-        <div class="callme-note" id="callmeNote">&#9742; Calling you now&hellip; pick up and the AI will brief you on the leak.</div>
-        <div class="stickybar" id="ticketBar">
-          <div class="row">
-            <button class="btn primary grow" id="ticketApprove">Approve</button>
-            <button class="btn text" id="ticketDecline">Decline</button>
-          </div>
-          <button class="btn ghost block" id="ticketCallme">Call me instead</button>
-          <div class="undobar hidden" id="ticketUndo"><span class="t">Vendor dispatched &middot; <span class="num" id="ticketUndoT">60</span>s</span><button id="ticketUndoBtn">Undo</button></div>
-        </div>
-      </div>
-      <!-- HOUSES -->
-      <div class="view" id="v-houses">
-        <div class="stitle">Houses</div>
-        <div class="ssub">What's the state of your doors? Every number taps through to its source.</div>
-        <div id="houseList"></div>
-      </div>
-      <div class="view" id="v-housedetail">
-        <div class="crumb"><b>Houses</b> &nbsp;&rsaquo;&nbsp; <span id="hdName">Udell Duplex</span></div>
-        <div class="stitle" style="font-size:24px" id="hdTitle">Udell Duplex</div>
-        <div class="ssub" id="hdSub"></div>
-        <div class="sec">Units</div>
-        <div id="unitList"></div>
-        <div class="sec">House rules <span style="font-weight:400;text-transform:none;letter-spacing:0">&middot; plain language, the AI follows these</span></div>
-        <div id="ruleList"></div>
-        <button class="btn ghost block mt16" id="editRulesBtn">Edit house rules</button>
-      </div>
 
-      <!-- VENDORS -->
-      <div class="view" id="v-vendors">
-        <div class="stitle">Vendors</div>
-        <div class="ssub">Who fixes things. Preferred is suggested first &mdash; backup only if you say so.</div>
-        <div id="vendorList"></div>
-        <button class="btn primary block mt16" id="addVendorBtn">+ Add vendor</button>
-        <p class="small mt8" style="text-align:center">Takes under a minute. Calls and texts go out from your Surely number.</p>
-      </div>
+        <!-- TICKET -->
+        <div class="view" id="v-ticket">
+          <div class="crumb"><button class="backlink" id="ticketBack">&#8249; <b>Today</b></button> &nbsp;&rsaquo;&nbsp; Udell Duplex &nbsp;&rsaquo;&nbsp; Unit A &nbsp;&rsaquo;&nbsp; Ticket #1042</div>
+          <div class="stitle" style="font-size:24px">Leak under the kitchen sink</div>
+          <div class="ssub">Reported by Denise Carter &middot; today, 9:02 AM</div>
+          <div class="photo">
+            <svg viewBox="0 0 358 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tenant photo of water under the kitchen sink">
+              <rect width="358" height="190" fill="#3a332b"/>
+              <rect x="0" y="0" width="358" height="46" fill="#2c2620"/>
+              <rect x="150" y="46" width="58" height="70" rx="6" fill="#8f8a80"/>
+              <rect x="163" y="116" width="32" height="44" fill="#6f6a60"/>
+              <path d="M179 160 q4 12 -6 18" stroke="#7fb3d5" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <circle cx="173" cy="184" r="4" fill="#7fb3d5"/>
+              <ellipse cx="120" cy="172" rx="52" ry="10" fill="#4d6a80" opacity=".8"/>
+              <ellipse cx="250" cy="178" rx="34" ry="8" fill="#4d6a80" opacity=".6"/>
+              <rect x="230" y="60" width="90" height="100" rx="8" fill="#54483c"/>
+              <text x="16" y="176" font-family="sans-serif" font-size="12" fill="#cfc8bd">tenant photo</text>
+            </svg>
+            <div class="cap">Tenant photo &middot; water pooling under the sink cabinet</div>
+          </div>
+          <div class="card urgent"><div class="spine"></div><div class="in">
+            <div class="badge">Urgent</div>
+            <h3 style="font-size:16px">Why this triage</h3>
+            <p class="what">Active drip at a supply line can damage the cabinet and subfloor within hours &mdash; it can't wait for the next visit.</p>
+          </div></div>
+          <div class="vendorcard">
+            <div class="sec" style="margin-top:0">Suggested vendor</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="hcircle" style="background:#3E7C4F">LH</div>
+              <div><div class="tt" style="font-weight:600">Luis Herrera</div>
+              <div class="ss small">Plumbing &middot; $90/hr &middot; <span class="pill pref">Preferred</span></div></div>
+            </div>
+            <p class="small mt8"><b>Why Luis:</b> fixed this same sink in March, knows the layout, and answers on Sundays.</p>
+            <div class="cost money"><span class="lbl">Estimated cost &mdash; shown before you decide</span>$180&ndash;$240</div>
+            <p class="small mt8">Under your $250 approval limit. You pay Luis directly, as today &mdash; no money moves in the app.</p>
+          </div>
+          <div class="callme-note" id="callmeNote">&#9742; Calling you now&hellip; pick up and the AI will brief you on the leak.</div>
+          <div class="stickybar" id="ticketBar">
+            <div class="row">
+              <button class="btn primary grow" id="ticketApprove">Approve</button>
+              <button class="btn text" id="ticketDecline">Decline</button>
+            </div>
+            <button class="btn ghost block" id="ticketCallme">Call me instead</button>
+            <div class="undobar hidden" id="ticketUndo"><span class="t">Vendor dispatched &middot; <span class="num" id="ticketUndoT">60</span>s</span><button id="ticketUndoBtn">Undo</button></div>
+          </div>
+        </div>
 
-      <!-- SETTINGS -->
-      <div class="view" id="v-settings">
-        <div class="stitle">AI settings</div>
-        <div class="ssub">What the AI may do without you. These are ceilings, not defaults.</div>
-        <div class="setrow">
-          <div><div class="t">Appearance</div><div class="d">Warm dark, not inverted gray</div></div>
-          <button class="switch" id="darkSwitch" aria-label="Dark mode"></button>
+        <!-- VENDORS CHANNEL -->
+        <div class="view" id="v-vendorschan">
+          <div class="crumb"><button class="backlink" id="vcBack">&#8249; <b>Channels</b></button></div>
+          <div class="stitle" style="font-size:24px"># Vendors</div>
+          <div class="ssub" id="vcSub">Udell Duplex &middot; watched by Surely AI</div>
+          <div class="sec" style="margin-top:6px">Threads</div>
+          <div id="vcThreads"></div>
+          <div class="sec">Vendor roster</div>
+          <div class="ssub">Who fixes things. Preferred is suggested first &mdash; backup only if you say so.</div>
+          <div id="vcRoster"></div>
+          <button class="btn primary block mt16" id="addVendorBtn">+ Add vendor</button>
+          <p class="small mt8" style="text-align:center">Takes under a minute. Calls and texts go out from your Surely number.</p>
         </div>
-        <div class="setrow" style="display:block">
-          <div class="t">Approval limit</div>
-          <div class="d">The AI can never approve spending above this &mdash; no exceptions.</div>
-          <div class="stepper mt8" style="margin-left:0;justify-content:flex-start">
-            <button id="limDown">&minus;</button><div class="val money" id="limVal">$250</div><button id="limPlus">+</button>
-          </div>
-        </div>
-        <div class="setrow">
-          <div><div class="t">Quiet hours</div><div class="d">10 PM &ndash; 7 AM &middot; non-emergencies wait. Emergencies always break through.</div></div>
-          <button class="switch on" id="qhSwitch" aria-label="Quiet hours"></button>
-        </div>
-        <div class="setrow" style="display:block">
-          <div class="t">Tone</div>
-          <div class="d">How the AI sounds to tenants. Pick one &mdash; no freeform.</div>
-          <div class="seg mt8" id="toneSeg">
-            <button class="on">Warm &amp; brief</button><button>Professional</button><button>Friendly neighbor</button>
-          </div>
-          <p class="small mt8" id="toneExample">&ldquo;Got it &mdash; I'll take care of it.&rdquo;</p>
-        </div>
-        <div class="sec">Escalation contacts</div>
-        <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#D95D1E;width:34px;height:34px;font-size:13px">D</div>
-          <div><div class="tt">David &mdash; you</div><div class="ss">Primary &middot; text + call</div></div><span class="pill pref">1st</span></div>
-        <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#6E655A;width:34px;height:34px;font-size:13px">M</div>
-          <div><div class="tt">Mom</div><div class="ss">Backup &middot; text + call after 30 min no-ack</div></div><span class="pill">2nd</span></div>
-        <div class="sec">Push notifications</div>
-        <div class="setrow">
-          <div><div class="t">Web Push</div><div class="d" id="pushStatusLine">Not subscribed in this demo</div></div>
-          <button class="btn ghost sm" style="margin-left:auto" id="openPushLab">Open push lab</button>
-        </div>
-        <div class="sec">About</div>
-        <div class="empty" style="padding:24px">
-          <div class="wordmark" style="font-size:30px">Surely</div>
-          <p>Surely. It'll get done.</p>
-          <p class="small mt8">Prototype &middot; fake data, nothing is real yet.</p>
-          <button class="btn ghost sm mt16" id="replayPush">Replay the push demo</button>
-        </div>
-      </div>
 
-      <!-- NUMBER -->
-      <div class="view" id="v-number">
-        <div class="stitle">Number</div>
-        <div class="ssub">What came in on the Surely line.</div>
-        <div class="numcard">
-          <div class="cap">YOUR SURELY NUMBER</div>
-          <div class="n num">(317) 555-0148</div>
-          <div class="cap">Tenants and vendors only ever see this number &mdash; never your personal one.</div>
-          <div class="actions" style="justify-content:center">
-            <button class="btn ghost sm" id="numTextBtn">Text</button>
-            <button class="btn ghost sm" id="numCallBtn">Call</button>
+        <!-- AI CHAT CHANNEL -->
+        <div class="view" id="v-aichat">
+          <div class="crumb"><button class="backlink" id="aiBack">&#8249; <b>Channels</b></button></div>
+          <div class="stitle" style="font-size:24px"># AI chat</div>
+          <div class="ssub" id="aiSub">Udell Duplex &middot; Surely AI is here</div>
+          <div class="chips" id="aiChips"></div>
+          <div class="thread" id="aiThread"></div>
+          <div class="takebar">
+            <div class="compose" style="display:flex">
+              <input class="cfield" id="aiField" placeholder="Ask about this property&hellip;">
+              <button class="btn primary" id="aiSend" style="min-height:48px">Send</button>
+            </div>
           </div>
         </div>
-        <div class="sec">Voicemail &middot; transcribed</div>
-        <div class="card emergency vmail"><div class="spine"></div><div class="in">
-          <div class="badge">Emergency &middot; voicemail</div>
-          <h3>Possible gas smell &mdash; Unit B</h3>
-          <p class="what">Marcus Webb &middot; today, 2:14 AM &middot; 0:42</p>
-          <div style="display:flex;align-items:center;gap:10px">
-            <button class="playbtn" id="vmPlay">&#9654;</button>
-            <div class="wave" id="vmWave"></div>
-            <span class="small num" id="vmTime">0:42</span>
-          </div>
-          <div class="transcript">&ldquo;Hey, it's Marcus in B. Sorry to call so late &mdash; I smell gas near the furnace in the utility closet. It's faint but it's definitely there. Let me know.&rdquo;</div>
-          <p class="why"><b>Why this triage:</b> any gas smell is treated as life-safety until ruled out &mdash; the AI texted and called you at 2:14 AM.</p>
-          <div class="actions">
-            <button class="btn primary sm grow" id="vmCallback">Call Marcus back</button>
-            <button class="btn text sm" id="vmHandled">Mark handled</button>
-          </div>
-        </div></div>
-        <div class="sec">Recent activity</div>
-        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
-          <div class="tx">Text thread &middot; Denise Carter, Unit A<span class="w">Leak photos received &middot; 9:02 AM</span></div></div>
-        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9742;</div>
-          <div class="tx">Outgoing call &middot; Luis Herrera<span class="w">2 min &middot; 8:40 AM</span></div></div>
-        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
-          <div class="tx">Text thread &middot; Marcus Webb, Unit B<span class="w">Rent timing question &middot; yesterday</span></div></div>
-      </div>
-      <!-- PUSH LAB -->
-      <div class="view" id="v-pushlab">
-        <style>
-          .plab-check{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid var(--hairline);font-size:14px}
-          .plab-check .box{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--hairline);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent}
-          .plab-check.done .box{background:var(--ok);border-color:var(--ok);color:#fff}
-          .plab-check.done{color:var(--ink2)}
-          .android{background:#1f1f1f;border-radius:18px;padding:14px;color:#e8e8e8;margin-top:12px;display:none;box-shadow:0 12px 32px rgba(0,0,0,.35)}
-          .android.show{display:block;animation:fadeUp .25s ease-out}
-          .android .ahead{display:flex;gap:10px;align-items:center}
-          .android .aicon{width:36px;height:36px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:19px;color:#fff;flex:none}
-          .android .aname{font-size:12px;color:#bdbdbd}.android .aname b{color:#e8e8e8;font-weight:600}
-          .android .atitle{font-size:15px;font-weight:600;margin-top:10px}
-          .android .abody{font-size:13.5px;color:#c9c9c9;margin-top:4px;line-height:1.45}
-          .android .atag{font-size:11px;color:#8f8f8f;margin-top:8px;font-family:ui-monospace,monospace}
-          .android .abtns{display:flex;gap:8px;margin-top:12px;border-top:1px solid #3a3a3a;padding-top:4px}
-          .android .abtns button{flex:1;background:none;border:none;color:#f5b98a;font-size:14px;font-weight:700;letter-spacing:.04em;padding:12px 0;cursor:pointer;text-transform:uppercase}
-          .android .abtns button:active{background:#2c2c2c;border-radius:8px}
-          .plab-log{background:#14110D;color:#d8d2c6;border-radius:14px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;line-height:1.7;max-height:260px;overflow-y:auto;margin-top:12px}
-          .plab-log .ok{color:#6FAE7E}.plab-log .dim{color:#8a8378}
-          .permcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:14px 16px;margin-top:12px}
-          details.plab-code{margin-top:12px;font-size:13px}
-          details.plab-code summary{cursor:pointer;color:var(--brand);font-weight:600}
-          details.plab-code pre{background:var(--ai-tint);border-radius:12px;padding:12px;font-size:11.5px;overflow-x:auto;margin-top:8px;line-height:1.55}
-        </style>
-        <button class="linklike" id="pushlabBack" style="margin-bottom:6px">&lsaquo; AI settings</button>
-        <div class="stitle">Push lab</div>
-        <div class="ssub">Web Push spike, demonstrated with local stubs &mdash; no backend, no network. This is the exact contract Phase 5 will implement against David's real Pixel 7.</div>
-        <div class="sec" style="margin-top:8px">Checklist</div>
-        <div id="plabChecks">
-          <div class="plab-check" data-k="perm"><span class="box">✓</span><span>Permission request UX + subscribe / unsubscribe toggle</span></div>
-          <div class="plab-check" data-k="render"><span class="box">✓</span><span>Notification renders with exactly Approve / Decline &mdash; text-only, 2 max (Android ignores action icons)</span></div>
-          <div class="plab-check" data-k="headless"><span class="box">✓</span><span>Approve fires <span class="num">notificationclick {action:'approve'}</span>, hits the stub endpoint, closes &mdash; no window opens (headless)</span></div>
-          <div class="plab-check" data-k="deep"><span class="box">✓</span><span>Body tap opens / focuses the PWA at <span class="num">/today?card=leak</span> with the card expanded</span></div>
-          <div class="plab-check" data-k="stale"><span class="box">✓</span><span>Re-push with the same <span class="num">tag</span> replaces &mdash; never stacks</span></div>
+
+        <!-- HOUSE DETAIL -->
+        <div class="view" id="v-housedetail">
+          <div class="crumb"><button class="backlink" id="hdBack">&#8249; <b>Channels</b></button> &nbsp;&rsaquo;&nbsp; <span id="hdName">Udell Duplex</span></div>
+          <div class="stitle" style="font-size:24px" id="hdTitle">Udell Duplex</div>
+          <div class="ssub" id="hdSub"></div>
+          <div class="sec">Units</div>
+          <div id="unitList"></div>
+          <div class="sec">House rules <span style="font-weight:400;text-transform:none;letter-spacing:0">&middot; plain language, the AI follows these</span></div>
+          <div id="ruleList"></div>
+          <button class="btn ghost block mt16" id="editRulesBtn">Edit house rules</button>
         </div>
-        <div class="sec">1 &middot; Permission &amp; subscription</div>
-        <div class="permcard">
-          <div class="kv"><span class="k">Browser permission</span><span class="v num" id="plabPerm">default (stub)</span></div>
-          <div class="kv" style="border-bottom:none"><span class="k">Push subscription</span><span class="v" id="plabSub">unsubscribed</span></div>
-          <div class="actions">
-            <button class="btn ghost sm grow" id="plabPermBtn">Request permission</button>
-            <button class="btn ghost sm grow" id="plabSubBtn" disabled>Subscribe</button>
+
+        <!-- SETTINGS -->
+        <div class="view" id="v-settings">
+          <div class="stitle">AI settings</div>
+          <div class="ssub">What the AI may do without you. These are ceilings, not defaults.</div>
+          <div class="setrow">
+            <div><div class="t">Appearance</div><div class="d">Warm dark, not inverted gray</div></div>
+            <button class="switch" id="darkSwitch" aria-label="Dark mode"></button>
           </div>
-          <p class="small mt8">Real OS prompts need https + a service worker; this file runs from disk, so the prompt is stubbed. The toggle shape is what ships.</p>
-        </div>
-        <div class="sec">2 &middot; Send a test push</div>
-        <button class="btn primary block" id="plabSend" disabled>Send test push</button>
-        <div class="android" id="plabNotif">
-          <div class="ahead"><div class="aicon">S</div><div class="aname"><b>Surely</b> &middot; <span id="plabWhen">now</span></div></div>
-          <div class="atitle">Approval needed &middot; <span class="money">$180&ndash;$240</span></div>
-          <div class="abody" id="plabBody">Leak under kitchen sink &middot; Unit A &mdash; Luis Herrera (preferred). Tap to review, or decide right here.</div>
-          <div class="atag">tag: card-leak &middot; urgency: high &middot; actions: 2/2 max</div>
-          <div class="abtns">
-            <button id="plabApprove">Approve</button>
-            <button id="plabDecline">Decline</button>
+          <div class="setrow" style="display:block">
+            <div class="t">Approval limit</div>
+            <div class="d">The AI can never approve spending above this &mdash; no exceptions.</div>
+            <div class="stepper mt8" style="margin-left:0;justify-content:flex-start">
+              <button id="limDown">&minus;</button><div class="val money" id="limVal">$250</div><button id="limPlus">+</button>
+            </div>
+          </div>
+          <div class="setrow">
+            <div><div class="t">Quiet hours</div><div class="d">10 PM &ndash; 7 AM &middot; non-emergencies wait. Emergencies always break through.</div></div>
+            <button class="switch on" id="qhSwitch" aria-label="Quiet hours"></button>
+          </div>
+          <div class="setrow" style="display:block">
+            <div class="t">Tone</div>
+            <div class="d">How the AI sounds to tenants. Pick one &mdash; no freeform.</div>
+            <div class="seg mt8" id="toneSeg">
+              <button class="on">Warm &amp; brief</button><button>Professional</button><button>Friendly neighbor</button>
+            </div>
+            <p class="small mt8" id="toneExample">&ldquo;Got it &mdash; I'll take care of it.&rdquo;</p>
+          </div>
+          <div class="sec">Escalation contacts</div>
+          <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#D95D1E;width:34px;height:34px;font-size:13px">D</div>
+            <div><div class="tt">David &mdash; you</div><div class="ss">Primary &middot; text + call</div></div><span class="pill pref">1st</span></div>
+          <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#6E655A;width:34px;height:34px;font-size:13px">M</div>
+            <div><div class="tt">Mom</div><div class="ss">Backup &middot; text + call after 30 min no-ack</div></div><span class="pill">2nd</span></div>
+          <p class="small mt8"><b>How escalation works:</b> urgent &rarr; text. No answer in 30 minutes &rarr; call. Emergency &rarr; call, instantly.</p>
+          <p class="small mt8">Star <span class="num">(317) 555-0148</span> as a favorite so emergencies reach you on Do Not Disturb.</p>
+          <div class="sec">Push notifications</div>
+          <div class="setrow">
+            <div><div class="t">Alert notifications</div><div class="d">Push + SMS for decisions that need you.</div></div>
+            <button class="switch on" id="alertSwitch" aria-label="Alert notifications"></button>
+          </div>
+          <div class="setrow">
+            <div><div class="t">Web Push</div><div class="d" id="pushStatusLine">Not subscribed in this demo</div></div>
+            <button class="btn ghost sm" style="margin-left:auto" id="openPushLab">Open push lab</button>
+          </div>
+          <div class="sec">About</div>
+          <div class="empty" style="padding:24px">
+            <div class="wordmark" style="font-size:30px">Surely</div>
+            <p>Surely. It'll get done.</p>
+            <p class="small mt8">Prototype &middot; fake data, nothing is real yet.</p>
+            <button class="btn ghost sm mt16" id="replayPush">Replay the push demo</button>
           </div>
         </div>
-        <div class="actions mt8">
-          <button class="btn ghost sm grow" id="plabBodyTap" disabled>Tap notification body</button>
-          <button class="btn ghost sm grow" id="plabRepush" disabled>Re-push same tag</button>
+
+        <!-- NUMBER -->
+        <div class="view" id="v-number">
+          <div class="stitle">Number</div>
+          <div class="ssub">What came in on the Surely line.</div>
+          <div class="numcard">
+            <div class="cap">YOUR SURELY NUMBER</div>
+            <div class="n num">(317) 555-0148</div>
+            <div class="cap">Tenants and vendors only ever see this number &mdash; never your personal one.</div>
+            <div class="actions" style="justify-content:center">
+              <button class="btn ghost sm" id="numTextBtn">Text</button>
+              <button class="btn ghost sm" id="numCallBtn">Call</button>
+            </div>
+            <p class="cap mt8">Star this number as a favorite so emergencies reach you on Do Not Disturb.</p>
+          </div>
+          <div class="sec">Voicemail &middot; transcribed</div>
+          <div class="card emergency vmail"><div class="spine"></div><div class="in">
+            <div class="badge">Emergency &middot; voicemail</div>
+            <h3>Possible gas smell &mdash; Unit B</h3>
+            <p class="what">Marcus Webb &middot; today, 2:14 AM &middot; 0:42</p>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="playbtn" id="vmPlay">&#9654;</button>
+              <div class="wave" id="vmWave"></div>
+              <span class="small num" id="vmTime">0:42</span>
+            </div>
+            <div class="transcript">&ldquo;Hey, it's Marcus in B. Sorry to call so late &mdash; I smell gas near the furnace in the utility closet. It's faint but it's definitely there. Let me know.&rdquo;</div>
+            <p class="why"><b>Why this triage:</b> any gas smell is treated as life-safety until ruled out &mdash; the AI texted and called you at 2:14 AM.</p>
+            <div class="actions">
+              <button class="btn primary sm grow" id="vmCallback">Call Marcus back</button>
+              <button class="btn text sm" id="vmHandled">Mark handled</button>
+            </div>
+          </div></div>
+          <div class="sec">Recent activity</div>
+          <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
+            <div class="tx">Text thread &middot; Denise Carter, Unit A<span class="w">Leak photos received &middot; 9:02 AM</span></div></div>
+          <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9742;</div>
+            <div class="tx">Outgoing call &middot; Luis Herrera<span class="w">2 min &middot; 8:40 AM</span></div></div>
+          <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
+            <div class="tx">Text thread &middot; Marcus Webb, Unit B<span class="w">Rent timing question &middot; yesterday</span></div></div>
         </div>
-        <p class="small mt8">Text-only buttons, 1&ndash;2 words each &mdash; Android renders no icons on actions, so labels carry the decision.</p>
-        <div class="sec">Event log</div>
-        <div class="plab-log" id="plabLog"><div class="dim">— waiting for the first push —</div></div>
-        <details class="plab-code">
-          <summary>The service-worker contract (Phase 5)</summary>
-          <pre>self.addEventListener('notificationclick', e =&gt; {
+
+        <!-- PUSH LAB -->
+        <div class="view" id="v-pushlab">
+          <style>
+            .plab-check{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid var(--hairline);font-size:14px}
+            .plab-check .box{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--hairline);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent}
+            .plab-check.done .box{background:var(--ok);border-color:var(--ok);color:#fff}
+            .plab-check.done{color:var(--ink2)}
+            .android{background:#1f1f1f;border-radius:18px;padding:14px;color:#e8e8e8;margin-top:12px;display:none;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+            .android.show{display:block;animation:fadeUp .25s ease-out}
+            .android .ahead{display:flex;gap:10px;align-items:center}
+            .android .aicon{width:36px;height:36px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:19px;color:#fff;flex:none}
+            .android .aname{font-size:12px;color:#bdbdbd}.android .aname b{color:#e8e8e8;font-weight:600}
+            .android .atitle{font-size:15px;font-weight:600;margin-top:10px}
+            .android .abody{font-size:13.5px;color:#c9c9c9;margin-top:4px;line-height:1.45}
+            .android .atag{font-size:11px;color:#8f8f8f;margin-top:8px;font-family:ui-monospace,monospace}
+            .android .abtns{display:flex;gap:8px;margin-top:12px;border-top:1px solid #3a3a3a;padding-top:4px}
+            .android .abtns button{flex:1;background:none;border:none;color:#f5b98a;font-size:14px;font-weight:700;letter-spacing:.04em;padding:12px 0;cursor:pointer;text-transform:uppercase}
+            .android .abtns button:active{background:#2c2c2c;border-radius:8px}
+            .plab-log{background:#14110D;color:#d8d2c6;border-radius:14px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;line-height:1.7;max-height:260px;overflow-y:auto;margin-top:12px}
+            .plab-log .ok{color:#6FAE7E}.plab-log .dim{color:#8a8378}
+            .permcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:14px 16px;margin-top:12px}
+            details.plab-code{margin-top:12px;font-size:13px}
+            details.plab-code summary{cursor:pointer;color:var(--brand);font-weight:600}
+            details.plab-code pre{background:var(--ai-tint);border-radius:12px;padding:12px;font-size:11.5px;overflow-x:auto;margin-top:8px;line-height:1.55}
+          </style>
+          <button class="linklike" id="pushlabBack">&lsaquo; AI settings</button>
+          <div class="stitle">Push lab</div>
+          <div class="ssub">Web Push spike, demonstrated with local stubs &mdash; no backend, no network. This is the exact contract Phase 5 will implement against David's real Pixel 7.</div>
+          <div class="sec" style="margin-top:8px">Checklist</div>
+          <div id="plabChecks">
+            <div class="plab-check" data-k="perm"><span class="box">✓</span><span>Permission request UX + subscribe / unsubscribe toggle</span></div>
+            <div class="plab-check" data-k="render"><span class="box">✓</span><span>Notification renders with exactly Approve / Decline &mdash; text-only, 2 max (Android ignores action icons)</span></div>
+            <div class="plab-check" data-k="headless"><span class="box">✓</span><span>Approve fires <span class="num">notificationclick {action:'approve'}</span>, hits the stub endpoint, closes &mdash; no window opens (headless)</span></div>
+            <div class="plab-check" data-k="deep"><span class="box">✓</span><span>Body tap opens / focuses the PWA at <span class="num">/today?card=leak</span> with the card expanded</span></div>
+            <div class="plab-check" data-k="stale"><span class="box">✓</span><span>Re-push with the same <span class="num">tag</span> replaces &mdash; never stacks</span></div>
+          </div>
+          <div class="sec">1 &middot; Permission &amp; subscription</div>
+          <div class="permcard">
+            <div class="kv"><span class="k">Browser permission</span><span class="v num" id="plabPerm">default (stub)</span></div>
+            <div class="kv" style="border-bottom:none"><span class="k">Push subscription</span><span class="v" id="plabSub">unsubscribed</span></div>
+            <div class="actions">
+              <button class="btn ghost sm grow" id="plabPermBtn">Request permission</button>
+              <button class="btn ghost sm grow" id="plabSubBtn" disabled>Subscribe</button>
+            </div>
+            <p class="small mt8">Real OS prompts need https + a service worker; this file runs from disk, so the prompt is stubbed. The toggle shape is what ships.</p>
+          </div>
+          <div class="sec">2 &middot; Send a test push</div>
+          <button class="btn primary block" id="plabSend" disabled>Send test push</button>
+          <div class="android" id="plabNotif">
+            <div class="ahead"><div class="aicon">S</div><div class="aname"><b>Surely</b> &middot; <span id="plabWhen">now</span></div></div>
+            <div class="atitle">Approval needed &middot; <span class="money">$180&ndash;$240</span></div>
+            <div class="abody" id="plabBody">Leak under kitchen sink &middot; Unit A &mdash; Luis Herrera (preferred). Tap to review, or decide right here.</div>
+            <div class="atag">tag: card-leak &middot; urgency: high &middot; actions: 2/2 max</div>
+            <div class="abtns">
+              <button id="plabApprove">Approve</button>
+              <button id="plabDecline">Decline</button>
+            </div>
+          </div>
+          <div class="actions mt8">
+            <button class="btn ghost sm grow" id="plabBodyTap" disabled>Tap notification body</button>
+            <button class="btn ghost sm grow" id="plabRepush" disabled>Re-push same tag</button>
+          </div>
+          <p class="small mt8">Text-only buttons, 1&ndash;2 words each &mdash; Android renders no icons on actions, so labels carry the decision.</p>
+          <div class="sec">Event log</div>
+          <div class="plab-log" id="plabLog"><div class="dim">— waiting for the first push —</div></div>
+          <details class="plab-code">
+            <summary>The service-worker contract (Phase 5)</summary>
+            <pre>self.addEventListener('notificationclick', e =&gt; {
   const d = e.notification.data; // {approveUrl, declineUrl, deepLink}
   e.notification.close();
   if (e.notification.tag) {/* re-push replaced in place */}
@@ -532,68 +599,63 @@ textarea{resize:vertical;min-height:70px}
         : clients.openWindow(d.deepLink)));
   }
 });</pre>
-        </details>
+          </details>
+        </div>
+      </div><!-- /viewport -->
+
+      <div class="scrim" id="scrim"></div>
+
+      <div class="sheet" id="sheet-addprop">
+        <div class="grip"></div>
+        <h2>Add property</h2>
+        <div class="shsub">A new circle in the rail. Tenants text the same Surely number.</div>
+        <div class="field"><label>Name</label><input id="npName" placeholder="e.g. Maple Street Duplex"></div>
+        <div class="field"><label>Doors</label><input id="npDoors" placeholder="e.g. 2 doors"></div>
+        <div class="field"><label>Area</label><input id="npArea" placeholder="e.g. Indianapolis 46208"></div>
+        <button class="btn primary block" id="npSave">Add property</button>
       </div>
-    </div><!-- /viewport -->
 
-    <div class="scrim" id="scrim"></div>
+      <div class="sheet" id="sheet-rules">
+        <div class="grip"></div>
+        <h2>House rules</h2>
+        <div class="shsub">Read-only here &mdash; this is what the AI follows in this thread.</div>
+        <div id="rulesReadonly"></div>
+        <button class="btn primary block mt16" id="rulesClose">Got it</button>
+      </div>
 
-    <div class="sheet" id="sheet-houseswitch">
-      <div class="grip"></div>
-      <h2>Switch house</h2>
-      <div class="shsub">Houses are servers. Pick one.</div>
-      <div id="switchList"></div>
-    </div>
+      <div class="sheet" id="sheet-editrules">
+        <div class="grip"></div>
+        <h2>Edit house rules</h2>
+        <div class="shsub" id="editRulesSub">Plain language. The AI reads these before every reply.</div>
+        <div id="rulesEdit"></div>
+        <button class="btn primary block mt16" id="saveRules">Save rules</button>
+      </div>
 
-    <div class="sheet" id="sheet-rules">
-      <div class="grip"></div>
-      <h2>House rules</h2>
-      <div class="shsub">Read-only here &mdash; this is what the AI follows in this thread.</div>
-      <div id="rulesReadonly"></div>
-      <button class="btn primary block mt16" id="rulesClose">Got it</button>
-    </div>
+      <div class="sheet" id="sheet-addvendor">
+        <div class="grip"></div>
+        <h2>Add vendor</h2>
+        <div class="shsub">Under a minute. They only ever see your Surely number.</div>
+        <div class="field"><label>Name</label><input id="nvName" placeholder="e.g. Ana Ruiz"></div>
+        <div class="field"><label>Trade</label><input id="nvTrade" placeholder="e.g. HVAC"></div>
+        <div class="field"><label>Phone</label><input id="nvPhone" placeholder="(555) 000-0000" inputmode="tel"></div>
+        <div class="field"><label>Typical rate</label><input id="nvRate" placeholder="e.g. $95/hr"></div>
+        <div class="field"><label>Role</label><div class="seg" id="nvRole"><button class="on">Preferred</button><button>Backup</button></div></div>
+        <button class="btn primary block" id="nvSave">Add vendor</button>
+      </div>
 
-    <div class="sheet" id="sheet-editrules">
-      <div class="grip"></div>
-      <h2>Edit house rules</h2>
-      <div class="shsub" id="editRulesSub">Plain language. The AI reads these before every reply.</div>
-      <div id="rulesEdit"></div>
-      <button class="btn primary block mt16" id="saveRules">Save rules</button>
-    </div>
+      <div class="sheet" id="sheet-numtext">
+        <div class="grip"></div>
+        <h2>Text from Surely</h2>
+        <div class="shsub">Sends from (317) 555-0148. Your personal number stays hidden.</div>
+        <div class="field"><label>To</label><input id="ntTo" placeholder="Name or number"></div>
+        <div class="field"><label>Message</label><textarea id="ntMsg" placeholder="Type your message&hellip;"></textarea></div>
+        <button class="btn primary block" id="ntSend">Send</button>
+      </div>
 
-    <div class="sheet" id="sheet-addvendor">
-      <div class="grip"></div>
-      <h2>Add vendor</h2>
-      <div class="shsub">Under a minute. They only ever see your Surely number.</div>
-      <div class="field"><label>Name</label><input id="nvName" placeholder="e.g. Ana Ruiz"></div>
-      <div class="field"><label>Trade</label><input id="nvTrade" placeholder="e.g. HVAC"></div>
-      <div class="field"><label>Phone</label><input id="nvPhone" placeholder="(555) 000-0000" inputmode="tel"></div>
-      <div class="field"><label>Typical rate</label><input id="nvRate" placeholder="e.g. $95/hr"></div>
-      <div class="field"><label>Role</label><div class="seg" id="nvRole"><button class="on">Preferred</button><button>Backup</button></div></div>
-      <button class="btn primary block" id="nvSave">Add vendor</button>
-    </div>
-
-    <div class="sheet" id="sheet-numtext">
-      <div class="grip"></div>
-      <h2>Text from Surely</h2>
-      <div class="shsub">Sends from (317) 555-0148. Your personal number stays hidden.</div>
-      <div class="field"><label>To</label><input id="ntTo" placeholder="Name or number"></div>
-      <div class="field"><label>Message</label><textarea id="ntMsg" placeholder="Type your message&hellip;"></textarea></div>
-      <button class="btn primary block" id="ntSend">Send</button>
-    </div>
-
-    <div class="toast" id="toast"></div>
-
-    <div class="tabs" id="tabs">
-      <button class="tab on" data-v="today"><span class="ic">&#9783;</span>Today</button>
-      <button class="tab" data-v="messages"><span class="ic">&#9993;</span>Messages</button>
-      <button class="tab" data-v="houses"><span class="ic">&#8962;</span>Houses</button>
-      <button class="tab" data-v="vendors"><span class="ic">&#128736;</span>Vendors</button>
-      <button class="tab" data-v="number"><span class="ic">&#9742;</span>Number</button>
-    </div>
+      <div class="toast" id="toast"></div>
+    </div><!-- /pmain -->
   </div><!-- /phone -->
 </div><!-- /stage -->
-
 <script>
 "use strict";
 /* ---------- fake data: David's world, 2 properties, 3 doors ---------- */
@@ -613,21 +675,21 @@ const VENDORS = [
   {name:"Ray's Rooter", trade:'Plumbing', rate:'$110/hr', role:'backup', props:'Udell Duplex', init:'RR', color:'#6E655A'}
 ];
 const state = {
-  house:'udell', view:'today', limit:250, dark:false,
+  view:'today', channelProp:'udell', limit:250, dark:false, vmOpen:true, alerts:true,
   needs:[
-    {id:'gas', kind:'emergency', badge:'Emergency', title:'Possible gas smell — Unit B',
-     what:'Marcus left a 2:14 AM voicemail: "smell of gas near the furnace." You were texted and called instantly.',
+    {id:'gas', house:'udell', kind:'emergency', ts:3, badge:'Emergency', title:'Possible gas smell — Unit B',
+     what:'Marcus left a 2:14 AM voicemail: "smell of gas near the furnace." Calling you now — emergencies always call.',
      why:'<b>Why you\'re seeing this:</b> any gas smell is life-safety until ruled out. Confirm you\'re handling it, or call him back from the Number tab.',
      state:'open'},
-    {id:'leak', kind:'approval', badge:'Approval needed', title:'Leak under the kitchen sink — Unit A',
+    {id:'leak', house:'udell', kind:'approval', ts:2, badge:'Approval needed', title:'Leak under the kitchen sink — Unit A',
      what:'Denise sent photos. Active drip at the supply line.',
      why:'<b>Why Luis:</b> your preferred plumber, fixed this same sink in March, and the <span class="money">$180–$240</span> estimate is under your <span class="money">$250</span> limit.',
      cost:'$180–$240', state:'open'},
-    {id:'rent', kind:'urgent', badge:'Urgent', title:'Rent timing question — Unit B',
-     what:'Marcus asks to pay on the 3rd this month — his payday moved.',
+    {id:'rent', house:'udell', kind:'urgent', ts:1, badge:'Urgent', title:'Rent timing question — Unit B',
+     what:'Marcus asks to pay on the 3rd this month — his payday moved. Text sent; urgent only calls if you don\'t answer in 30 min.',
      why:'<b>Why you\'re seeing this:</b> your grace rule allows 5 days, so the AI drafted a reply. It only sends if you approve.',
      draft:'Noted — rent on the 3rd this month, back to the 1st after. 👍', state:'open'},
-    {id:'lease', kind:'fyi', badge:'FYI', title:'Cottage lease renews in 60 days',
+    {id:'lease', house:'cottage', kind:'fyi', ts:0, badge:'FYI', title:'Cottage lease renews in 60 days',
      what:'Priya\'s lease ends May 31. Nothing is due yet.',
      why:'<b>Why you\'re seeing this:</b> so it doesn\'t sneak up on you.', state:'open'}
   ],
@@ -645,10 +707,9 @@ let toastT=null;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
 function go(v){state.view=v;$$('.view').forEach(x=>x.classList.remove('on'));
   const el=$('#v-'+v); if(el)el.classList.add('on');
-  $$('#tabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));
-  viewport.scrollTop=0;}
-$$('#tabs .tab').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
-$('#gearBtn').addEventListener('click',()=>go('settings'));
+  $('#hdrToday').classList.toggle('hidden',v!=='today');
+  $('#hdrChan').classList.toggle('hidden',v!=='channels');
+  syncRailActive();viewport.scrollTop=0;}
 
 /* theme */
 function setDark(d){state.dark=d;document.documentElement.dataset.theme=d?'dark':'light';
@@ -656,31 +717,101 @@ function setDark(d){state.dark=d;document.documentElement.dataset.theme=d?'dark'
 $('#themeBtn').addEventListener('click',()=>setDark(!state.dark));
 $('#darkSwitch').addEventListener('click',()=>setDark(!state.dark));
 
-/* rail (desktop) + context bar + house switcher */
-function house(){return HOUSES.find(h=>h.id===state.house);}
-function renderRail(){const r=$('#rail');r.innerHTML='';
-  HOUSES.forEach((h,i)=>{const b=document.createElement('button');b.className='rc'+(h.id===state.house?' active':'');
-    b.style.background=h.color;b.textContent=h.short;b.title=h.name;
-    b.addEventListener('click',()=>setHouse(h.id));r.appendChild(b);
-    if(i<HOUSES.length-1){const d=document.createElement('div');d.className='rdiv';r.appendChild(d);}});}
-function renderCtx(){const h=house();$('#houseCircle').textContent=h.short;$('#houseCircle').style.background=h.color;
-  $('#houseName').textContent=h.name;$('#houseSub').textContent=h.doors+' · '+h.area;}
-function setHouse(id){state.house=id;renderRail();renderCtx();renderMsgs();closeSheets();toast('Switched to '+house().name);}
-function renderSwitchList(){const w=$('#switchList');w.innerHTML='';
-  HOUSES.forEach(h=>{const b=document.createElement('button');b.className='hsrow';
-    b.innerHTML=`<div class="hcircle" style="background:${h.color}">${h.short}</div><div><div style="font-weight:600">${h.name}</div><div class="small">${h.doors} · ${h.area}</div></div>${h.id===state.house?'<span class="tick">✓</span>':''}`;
-    b.addEventListener('click',()=>setHouse(h.id));w.appendChild(b);});}
-$('#houseBtn').addEventListener('click',()=>{renderSwitchList();openSheet('sheet-houseswitch');});
+/* ---------- Discord-style rail: home · properties · + · number · settings ---------- */
+function house(){return HOUSES.find(h=>h.id===state.channelProp);}
+function propPending(hid){
+  const open=state.needs.filter(c=>c.house===hid&&(c.state==='open'||c.state==='dispatching'));
+  return{n:open.length, emg:open.some(c=>c.kind==='emergency')};
+}
+function railActiveKey(){
+  if(state.view==='today')return'home';
+  if(state.view==='number')return'number';
+  if(state.view==='settings'||state.view==='pushlab')return'settings';
+  if(['channels','thread','ticket','housedetail','vendorschan','aichat'].includes(state.view))return'prop:'+state.channelProp;
+  return'home';
+}
+function buildRail(container){
+  container.innerHTML='';
+  const key=railActiveKey();
+  const mk=(cls,html,title,onclick,badge)=>{
+    const b=document.createElement('button');b.className='pc '+cls;b.title=title;b.setAttribute('aria-label',title);
+    b.innerHTML=html+(badge?`<span class="pbadge${badge.emg?' emg':''}">${badge.n}</span>`:'');
+    b.addEventListener('click',onclick);container.appendChild(b);return b;};
+  mk('home'+(key==='home'?' active':''),'S','Surely home — Today',()=>go('today'));
+  const div=document.createElement('div');div.className='pdiv';container.appendChild(div);
+  HOUSES.forEach(h=>{
+    const p=propPending(h.id);
+    const c=document.createElement('button');
+    c.className='pc'+((key==='prop:'+h.id)?' active':'');
+    c.style.background=h.color;c.textContent=h.short;c.title=h.name;c.setAttribute('aria-label',h.name);
+    if(p.n){const s=document.createElement('span');s.className='pbadge'+(p.emg?' emg':'');s.textContent=p.n;c.appendChild(s);}
+    c.addEventListener('click',()=>showChannels(h.id));
+    container.appendChild(c);});
+  mk('add','+','Add property',()=>openSheet('sheet-addprop'));
+  const sp=document.createElement('div');sp.className='pspacer';container.appendChild(sp);
+  const div2=document.createElement('div');div2.className='pdiv';container.appendChild(div2);
+  mk('util'+(key==='number'?' active':''),'&#9742;','Surely number',()=>go('number'),
+    state.vmOpen?{n:1,emg:true}:null);
+  mk('util'+(key==='settings'?' active':''),'&#9881;','AI settings',()=>go('settings'));
+}
+function syncRailActive(){buildRail($('#prail'));buildRail($('#rail'));}
+function renderRail(){syncRailActive();}
+
+/* "+" — add property */
+const PROP_COLORS=['#6E655A','#B97A0C','#3E7C4F','#8A5A44'];
+$('#npSave').addEventListener('click',()=>{
+  const name=$('#npName').value.trim()||'New Property';
+  const id='p'+Date.now().toString(36);
+  const short=name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  HOUSES.push({id,name,short,color:PROP_COLORS[HOUSES.length%PROP_COLORS.length],
+    doors:$('#npDoors').value.trim()||'1 door',area:$('#npArea').value.trim()||'',
+    rules:['Rent is due the 1st. 5-day grace, no late fee inside it.','Quiet hours 10 PM – 7 AM.']});
+  ['npName','npDoors','npArea'].forEach(i=>$('#'+i).value='');
+  closeSheets();showChannels(id);toast(name+' added — circle\'s in the rail');});
 
 /* sheets */
 function openSheet(id){$('#scrim').classList.add('on');$('#'+id).classList.add('on');}
 function closeSheets(){$('#scrim').classList.remove('on');$$('.sheet').forEach(s=>s.classList.remove('on'));}
 $('#scrim').addEventListener('click',closeSheets);
 $('#rulesClose').addEventListener('click',closeSheets);
+
+/* ================= channels ================= */
+function showChannels(hid){
+  state.channelProp=hid;const h=house();
+  $('#chHouseCircle').textContent=h.short;$('#chHouseCircle').style.background=h.color;
+  $('#chHouseName').textContent=h.name;$('#chHouseSub').textContent=h.doors+(h.area?' · '+h.area:'');
+  renderChannels();closeSheets();go('channels');
+}
+$('#chInfoBtn').addEventListener('click',()=>openHouse(state.channelProp));
+function presenceHTML(label){return `<span class="presence"><span class="pdot"></span>${label}</span>`;}
+function renderChannels(){
+  const hid=state.channelProp;
+  const wt=$('#chanTenants');wt.innerHTML='';
+  Object.entries(THREADS).filter(([id,t])=>t.house===hid&&!t.vendor).forEach(([id,t])=>{
+    const last=t.msgs[t.msgs.length-1];
+    const b=document.createElement('button');b.className='chrow'+(t.unread?' unread':'');
+    b.innerHTML=`<span class="hash">#</span>
+      <div><div class="tt">${t.name} <span class="small">· ${t.unit}</span></div>
+      <div class="ss">${last.text.slice(0,46)}${last.text.length>46?'…':''}</div></div>
+      ${t.unread?'<span class="dotunread"></span>':''}${presenceHTML('AI watching')}`;
+    b.addEventListener('click',()=>openThread(id));wt.appendChild(b);});
+  const ws=$('#chanSurely');ws.innerHTML='';
+  const vthreads=Object.entries(THREADS).filter(([id,t])=>t.house===hid&&t.vendor);
+  const vnames=vthreads.map(([id,t])=>t.name).join(', ')||'no vendor threads yet';
+  const mk=(hash,title,sub,pres,onclick)=>{
+    const b=document.createElement('button');b.className='chrow';
+    b.innerHTML=`<span class="hash">${hash}</span>
+      <div><div class="tt">${title}</div><div class="ss">${sub}</div></div>
+      ${presenceHTML(pres)}`;
+    b.addEventListener('click',onclick);ws.appendChild(b);};
+  mk('#','Vendors',vnames,'AI watching',()=>openVendorChan(hid));
+  mk('#','AI chat','Ask Surely about this property','AI here',()=>openAiChat(hid));
+}
+
 /* ================= Today ================= */
 const KIND_ORDER={emergency:0,approval:1,urgent:2,fyi:3};
 function openNeeds(){return state.needs.filter(c=>c.state==='open'||c.state==='dispatching')
-  .sort((a,b)=>KIND_ORDER[a.kind]-KIND_ORDER[b.kind]);}
+  .sort((a,b)=>(KIND_ORDER[a.kind]-KIND_ORDER[b.kind])||(b.ts-a.ts));}
 function renderNeeds(){
   const w=$('#needs'), open=openNeeds();
   $('#needsWrap').classList.toggle('hidden',open.length===0);
@@ -705,13 +836,24 @@ function renderNeeds(){
     inner+=`</div>`;
     d.innerHTML=inner;w.appendChild(d);
   });
+  renderRail();
 }
 function renderHandled(){
   const w=$('#handled');w.innerHTML='';
-  state.handled.slice(0,20).forEach(h=>{
+  const cap=20, items=state.handled.slice(0,cap);
+  items.forEach(h=>{
     const d=document.createElement('div');d.className='hrow';
     d.innerHTML=`<div class="chk">✓</div><div class="tx">${h.t}<span class="w">${h.w}</span></div><div class="when">${h.when}</div>`;
     w.appendChild(d);});
+  const eb=$('#earlierBtn');
+  if(state.handled.length>cap){eb.classList.remove('hidden');
+    eb.textContent=`Earlier (${state.handled.length-cap})`;
+    eb.onclick=()=>{eb.classList.add('hidden');
+      state.handled.slice(cap).forEach(h=>{
+        const d=document.createElement('div');d.className='hrow';
+        d.innerHTML=`<div class="chk">✓</div><div class="tx">${h.t}<span class="w">${h.w}</span></div><div class="when">${h.when}</div>`;
+        w.appendChild(d);});};
+  } else eb.classList.add('hidden');
 }
 function resolveCard(id){const c=state.needs.find(x=>x.id===id);if(c)c.state='resolved';renderNeeds();renderHandled();}
 function pushHandled(t,w,when){state.handled.unshift({t,w,when:when||'now'});renderHandled();}
@@ -782,26 +924,14 @@ const THREADS={
       {from:'ai',text:'Thanks Luis — see you Thursday.',tm:'Thu 8:11 AM'}]}
 };
 let curThread=null, takenOver=false;
-function renderMsgs(){
-  const w=$('#msgList');w.innerHTML='';
-  HOUSES.filter(h=>h.id===state.house).forEach(h=>{
-    const sec=document.createElement('div');sec.className='sec';sec.style.marginTop='6px';sec.textContent=h.name;w.appendChild(sec);
-    Object.entries(THREADS).filter(([id,t])=>t.house===h.id).forEach(([id,t])=>{
-      const last=t.msgs[t.msgs.length-1];
-      const b=document.createElement('button');b.className='lrow';
-      b.innerHTML=`<div class="hcircle" style="background:${t.vendor?'#3E7C4F':'#6E655A'};width:40px;height:40px">${t.name.split(' ').map(x=>x[0]).join('')}</div>
-        <div><div class="tt">${t.name} <span class="small">· ${t.unit}</span></div>
-        <div class="ss">${last.text.slice(0,52)}${last.text.length>52?'…':''}</div></div>
-        ${t.unread?'<span class="dotunread"></span>':''}<span class="chev">›</span>`;
-      b.addEventListener('click',()=>openThread(id));w.appendChild(b);});
-  });
-}
 function openThread(id){
   curThread=id;const t=THREADS[id];t.unread=false;
-  $('#thHouse').textContent=house().name==='Udell Duplex'&&t.house==='cottage'?'Garfield Park Cottage':(t.house==='udell'?'Udell Duplex':'Garfield Park Cottage');
+  const h=HOUSES.find(x=>x.id===t.house);
+  $('#thHouse').textContent=h?h.name:'';
   $('#thUnit').textContent=t.unit;$('#thName').textContent=t.name;$('#thTitle').textContent=t.title;
-  renderThread();setTaken(false);go('thread');renderMsgs();
+  renderThread();setTaken(false);go('thread');renderChannels();
 }
+$('#thBack').addEventListener('click',()=>showChannels(THREADS[curThread].house));
 function renderThread(){
   const t=THREADS[curThread],w=$('#threadBody');w.innerHTML='';
   t.msgs.forEach(m=>{
@@ -836,53 +966,31 @@ function syncTicketBar(){
   else{bar.querySelector('.row').classList.remove('hidden');$('#ticketCallme').classList.remove('hidden');$('#ticketUndo').classList.add('hidden');}
   if(!c||c.state==='resolved'){bar.innerHTML='<div class="sent-note">✓ Handled — Luis Herrera was dispatched.</div>';}
 }
+$('#ticketBack').addEventListener('click',()=>go('today'));
 $('#ticketApprove').addEventListener('click',()=>{approveLeak();toast('Approved — vendor dispatched');});
 $('#ticketDecline').addEventListener('click',()=>{document.querySelector('#needs [data-act="decline"]')?.click();go('today');});
 $('#ticketCallme').addEventListener('click',()=>{$('#callmeNote').classList.add('on');toast('AI is calling you now');});
 $('#ticketUndoBtn').addEventListener('click',undoLeak);
-/* ================= Houses ================= */
-let detailHouse='udell';
-function renderHouses(){
-  const w=$('#houseList');w.innerHTML='';
-  HOUSES.forEach(h=>{
-    const units=UNITS.filter(u=>u.house===h.id);
-    const b=document.createElement('button');b.className='lrow';
-    b.innerHTML=`<div class="hcircle" style="background:${h.color}">${h.short}</div>
-      <div><div class="tt">${h.name}</div><div class="ss">${h.doors} · ${h.area}</div></div><span class="chev">›</span>`;
-    b.addEventListener('click',()=>openHouse(h.id));w.appendChild(b);});
-}
-function openHouse(id){
-  detailHouse=id;const h=HOUSES.find(x=>x.id===id);
-  $('#hdName').textContent=h.name;$('#hdTitle').textContent=h.name;
-  $('#hdSub').textContent=h.doors+' · '+h.area;
-  const ul=$('#unitList');ul.innerHTML='';
-  UNITS.filter(u=>u.house===id).forEach(u=>{
-    const d=document.createElement('div');d.className='lrow';d.style.cursor='default';
-    d.innerHTML=`<div><div class="tt">${u.unit} — ${u.tenant}</div>
-      <div class="ss">Lease: ${u.lease}</div></div>
-      <button class="pill" style="margin-left:auto;cursor:pointer" data-tix="${u.open}">${u.open} open ticket${u.open===1?'':'s'}</button>`;
-    d.querySelector('[data-tix]').addEventListener('click',e=>{e.stopPropagation();
-      if(+e.target.dataset.tix>0)go('ticket');else toast('No open tickets for this unit');});
-    ul.appendChild(d);});
-  renderRules();go('housedetail');
-}
-function renderRules(){
-  const h=HOUSES.find(x=>x.id===detailHouse);
-  $('#ruleList').innerHTML=h.rules.map(r=>`<div class="hrow"><div class="chk" style="background:var(--ai-tint);color:var(--ink)">§</div><div class="tx">${r}</div></div>`).join('');
-}
-$('#editRulesBtn').addEventListener('click',()=>{
-  const h=HOUSES.find(x=>x.id===detailHouse);
-  $('#editRulesSub').textContent=h.name+' — plain language. The AI reads these before every reply.';
-  $('#rulesEdit').innerHTML=h.rules.map((r,i)=>`<div class="field"><label>Rule ${i+1}</label><textarea data-ri="${i}">${r}</textarea></div>`).join('');
-  openSheet('sheet-editrules');});
-$('#saveRules').addEventListener('click',()=>{
-  const h=HOUSES.find(x=>x.id===detailHouse);
-  $$('#rulesEdit [data-ri]').forEach(t=>{h.rules[+t.dataset.ri]=t.value;});
-  renderRules();closeSheets();toast('House rules updated');});
 
-/* ================= Vendors ================= */
-function renderVendors(){
-  const w=$('#vendorList');w.innerHTML='';
+/* ================= Vendors channel ================= */
+function openVendorChan(hid){
+  state.channelProp=hid;const h=house();
+  $('#vcSub').textContent=h.name+' · watched by Surely AI';
+  const wt=$('#vcThreads');wt.innerHTML='';
+  Object.entries(THREADS).filter(([id,t])=>t.house===hid&&t.vendor).forEach(([id,t])=>{
+    const last=t.msgs[t.msgs.length-1];
+    const b=document.createElement('button');b.className='chrow'+(t.unread?' unread':'');
+    b.innerHTML=`<span class="hash">#</span>
+      <div><div class="tt">${t.name} <span class="small">· ${t.unit}</span></div>
+      <div class="ss">${last.text.slice(0,46)}${last.text.length>46?'…':''}</div></div>
+      ${t.unread?'<span class="dotunread"></span>':''}${presenceHTML('AI watching')}`;
+    b.addEventListener('click',()=>openThread(id));wt.appendChild(b);});
+  if(!wt.children.length)wt.innerHTML='<p class="small">No vendor threads at this property yet.</p>';
+  renderRoster();go('vendorschan');
+}
+$('#vcBack').addEventListener('click',()=>showChannels(state.channelProp));
+function renderRoster(){
+  const w=$('#vcRoster');w.innerHTML='';
   VENDORS.forEach(v=>{
     const d=document.createElement('div');d.className='lrow';d.style.cursor='default';
     d.innerHTML=`<div class="hcircle" style="background:${v.color};width:40px;height:40px;font-size:13px">${v.init}</div>
@@ -902,12 +1010,89 @@ $('#nvSave').addEventListener('click',()=>{
   VENDORS.push({name:n,trade:$('#nvTrade').value.trim()||'General',rate:$('#nvRate').value.trim()||'—',
     role:$('#nvRole .on').textContent.toLowerCase(),props:house().name,init:n.split(' ').map(x=>x[0]).join('').slice(0,2),color:'#6E655A'});
   ['nvName','nvTrade','nvPhone','nvRate'].forEach(id=>$('#'+id).value='');
-  renderVendors();closeSheets();toast(n+' added');});
+  renderRoster();closeSheets();toast(n+' added');});
+
+/* ================= AI chat channel ================= */
+const AI_SEED={
+  udell:[{from:'ai',text:"I'm watching Udell Duplex — both units, vendors, the number. Ask me anything about this property.",tm:'Today'}],
+  cottage:[{from:'ai',text:"I'm watching the Cottage. Ask me anything about this property.",tm:'Today'}]
+};
+function openAiChat(hid){
+  state.channelProp=hid;const h=house();
+  $('#aiSub').textContent=h.name+' · Surely AI is here';
+  renderAiThread();
+  const chips=$('#aiChips');chips.innerHTML='';
+  ["Who's my plumber?",'Anything due this week?','Quiet hours?'].forEach(q=>{
+    const c=document.createElement('button');c.className='chip';c.textContent=q;
+    c.addEventListener('click',()=>aiAsk(q));chips.appendChild(c);});
+  go('aichat');
+}
+$('#aiBack').addEventListener('click',()=>showChannels(state.channelProp));
+function renderAiThread(){
+  const w=$('#aiThread');w.innerHTML='';
+  (AI_SEED[state.channelProp]||[]).forEach(m=>{
+    const d=document.createElement('div');
+    if(m.from==='ai'){d.className='bub ai';d.innerHTML=`<span class="ailabel">Surely AI</span>${m.text}<span class="tm">${m.tm}</span>`;}
+    else{d.className='bub me';d.innerHTML=`<span class="melabel">You</span>${m.text}<span class="tm">${m.tm}</span>`;}
+    w.appendChild(d);});
+}
+function aiAnswer(q){
+  const s=q.toLowerCase(), h=house();
+  if(/plumb/.test(s))return'Luis Herrera is your preferred plumber — $90/hr, answers on Sundays. He fixed the Udell sink in March.';
+  if(/due|week|rent/.test(s))return'Rent is due the 1st with a 5-day grace at '+h.name+'. Nothing else is due this week.';
+  if(/quiet/.test(s))return'Quiet hours are 10 PM – 7 AM at '+h.name+'. Non-emergencies wait; emergencies always break through.';
+  if(/lease/.test(s))return state.channelProp==='cottage'
+    ?'Priya\'s Cottage lease ends May 31 — nothing due yet, I\'ll flag it again in 30 days.'
+    :'Udell leases: Unit A through Dec 31, Unit B through Feb 28, 2027.';
+  return'Noted — I\'ll keep an eye on it and flag you if it needs a decision.';
+}
+function aiAsk(q){
+  const seed=AI_SEED[state.channelProp]||(AI_SEED[state.channelProp]=[]);
+  seed.push({from:'me',text:q,tm:'now'});renderAiThread();
+  setTimeout(()=>{seed.push({from:'ai',text:aiAnswer(q),tm:'now'});renderAiThread();
+    viewport.scrollTop=viewport.scrollHeight;},450);
+}
+$('#aiSend').addEventListener('click',()=>{const f=$('#aiField'),v=f.value.trim();if(!v)return;f.value='';aiAsk(v);});
+$('#aiField').addEventListener('keydown',e=>{if(e.key==='Enter')$('#aiSend').click();});
+
+/* ================= House detail ================= */
+let detailHouse='udell';
+function openHouse(id){
+  detailHouse=id;const h=HOUSES.find(x=>x.id===id);
+  $('#hdName').textContent=h.name;$('#hdTitle').textContent=h.name;
+  $('#hdSub').textContent=h.doors+(h.area?' · '+h.area:'');
+  const ul=$('#unitList');ul.innerHTML='';
+  UNITS.filter(u=>u.house===id).forEach(u=>{
+    const d=document.createElement('div');d.className='lrow';d.style.cursor='default';
+    d.innerHTML=`<div><div class="tt">${u.unit} — ${u.tenant}</div>
+      <div class="ss">Lease: ${u.lease}</div></div>
+      <button class="pill" style="margin-left:auto;cursor:pointer" data-tix="${u.open}">${u.open} open ticket${u.open===1?'':'s'}</button>`;
+    d.querySelector('[data-tix]').addEventListener('click',e=>{e.stopPropagation();
+      if(+e.target.dataset.tix>0)go('ticket');else toast('No open tickets for this unit');});
+    ul.appendChild(d);});
+  renderRules();go('housedetail');
+}
+$('#hdBack').addEventListener('click',()=>showChannels(detailHouse));
+function renderRules(){
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $('#ruleList').innerHTML=h.rules.map(r=>`<div class="hrow"><div class="chk" style="background:var(--ai-tint);color:var(--ink)">§</div><div class="tx">${r}</div></div>`).join('');
+}
+$('#editRulesBtn').addEventListener('click',()=>{
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $('#editRulesSub').textContent=h.name+' — plain language. The AI reads these before every reply.';
+  $('#rulesEdit').innerHTML=h.rules.map((r,i)=>`<div class="field"><label>Rule ${i+1}</label><textarea data-ri="${i}">${r}</textarea></div>`).join('');
+  openSheet('sheet-editrules');});
+$('#saveRules').addEventListener('click',()=>{
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $$('#rulesEdit [data-ri]').forEach(t=>{h.rules[+t.dataset.ri]=t.value;});
+  renderRules();closeSheets();toast('House rules updated');});
 
 /* ================= Settings ================= */
 $('#limDown').addEventListener('click',()=>{state.limit=Math.max(50,state.limit-50);$('#limVal').textContent='$'+state.limit;});
 $('#limPlus').addEventListener('click',()=>{state.limit+=50;$('#limVal').textContent='$'+state.limit;});
 $('#qhSwitch').addEventListener('click',e=>e.target.classList.toggle('on'));
+$('#alertSwitch').addEventListener('click',e=>{state.alerts=e.target.classList.toggle('on');
+  toast(state.alerts?'Alert notifications on':'Alert notifications off — decisions will wait in Today');});
 $$('#toneSeg button').forEach(b=>b.addEventListener('click',()=>{
   $$('#toneSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
   const ex={'Warm & brief':'“Got it — I\'ll take care of it.”','Professional':'“Understood. I will arrange this promptly.”','Friendly neighbor':'“You got it, neighbor — on it!”'};
@@ -924,7 +1109,7 @@ $('#vmPlay').addEventListener('click',()=>{
   vmTimer=setInterval(()=>{s--;$('#vmTime').textContent='0:'+String(s).padStart(2,'0');
     if(s<=0){clearInterval(vmTimer);vmTimer=null;btn.innerHTML='&#9654;';$('#vmTime').textContent='0:42';}},1000);});
 $('#vmCallback').addEventListener('click',()=>toast('Calling Marcus from (317) 555-0148…'));
-$('#vmHandled').addEventListener('click',()=>{toast('Voicemail marked handled');});
+$('#vmHandled').addEventListener('click',()=>{state.vmOpen=false;renderRail();toast('Voicemail marked handled');});
 $('#numTextBtn').addEventListener('click',()=>openSheet('sheet-numtext'));
 $('#numCallBtn').addEventListener('click',()=>toast('Calling from your Surely number…'));
 $('#ntSend').addEventListener('click',()=>{
@@ -972,7 +1157,7 @@ $('#plabSend').addEventListener('click',()=>{
 $('#plabApprove').addEventListener('click',()=>{
   plog(`notificationclick — event.action='approve'`);
   plog(`POST /api/cards/leak/approve?sig=stub… → 200 (stub)`);
-  plog(`notification.close() — no window opened ✓ headless`,'ok');
+  plog(`notification.close() — no window opened ✓ headless`);
   $('#plabNotif').classList.remove('show');
   approveLeak();plabCheck('headless');
   toast('Approved from the notification — 1 tap');});
@@ -999,7 +1184,7 @@ $('#plabRepush').addEventListener('click',()=>{
   plabCheck('stale');});
 
 /* ================= init ================= */
-renderRail();renderCtx();renderNeeds();renderHandled();renderMsgs();renderHouses();renderVendors();
+renderRail();renderNeeds();renderHandled();renderChannels();
 setTimeout(()=>$('#splash').classList.add('hide'),900);
 setTimeout(showPush,2400);
 </script>
