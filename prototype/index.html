@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Surely — Prototype</title>
+<style>
+:root{
+  --bg:#FAF7F2; --surface:#FFFFFF; --ink:#1B1712; --ink2:#6E655A;
+  --hairline:#E8E1D6; --brand:#D95D1E; --brand-ink:#FFFFFF;
+  --emergency:#C22F2F; --urgent:#B97A0C; --ok:#3E7C4F;
+  --ai-tint:#F1ECE3; --scrim:rgba(27,23,18,.45);
+  --serif:Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#14110D; --surface:#1E1A15; --ink:#F5F1EA; --ink2:#A89E90;
+  --hairline:#2E2822; --brand:#F07B3A; --brand-ink:#1B1712;
+  --emergency:#E05757; --urgent:#E0A63C; --ok:#6FAE7E;
+  --ai-tint:#26211B; --scrim:rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--sans);background:#2b2620;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:16px}
+.num,.money{font-variant-numeric:tabular-nums}
+.stage{display:flex;gap:24px;align-items:flex-start;justify-content:center;width:100%}
+.phone{position:relative;width:390px;height:min(880px,100vh);background:var(--bg);
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+@media(max-width:819px){.phone{height:100vh;width:100%;max-width:430px}}
+.rail{display:none;flex-direction:column;align-items:center;gap:14px;padding:22px 12px;
+  background:#211c16;border-radius:20px;margin-top:40px}
+@media(min-width:820px){.rail{display:flex}}
+.rail .rc{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:18px;color:#fff;cursor:pointer;
+  border:3px solid transparent;transition:border-color .2s}
+.rail .rc.active{border-color:#F07B3A}
+.rail .rdiv{width:28px;height:1px;background:#4a4238}
+.splash{position:absolute;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;transition:opacity .4s}
+.splash.hide{opacity:0;pointer-events:none}
+.wordmark{font-family:var(--serif);font-style:italic;color:var(--brand)}
+.wordmark.big{font-size:52px}.wordmark.mid{font-size:20px}
+.splash .tag{color:var(--ink2);font-size:15px}
+.push{position:absolute;top:10px;left:12px;right:12px;z-index:150;background:var(--surface);
+  border:1px solid var(--hairline);border-radius:16px;padding:12px 14px;display:flex;gap:10px;
+  align-items:flex-start;box-shadow:0 10px 30px rgba(0,0,0,.18);cursor:pointer;
+  transform:translateY(-130%);transition:transform .35s ease-out}
+.push.show{transform:translateY(0)}
+.push .dot{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:18px}
+.push b{font-size:14px}.push p{font-size:13px;color:var(--ink2);margin-top:2px}
+.push .now{font-size:11px;color:var(--ink2);margin-left:auto;flex:none}
+.hdr{padding:14px 16px 8px;border-bottom:1px solid var(--hairline);background:var(--bg);z-index:20}
+.hdr .row1{display:flex;align-items:center;justify-content:space-between}
+.hdr .icons{display:flex;gap:6px;align-items:center}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--hairline);background:var(--surface);
+  color:var(--ink);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ctxbar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 10px;background:var(--surface);
+  border:1px solid var(--hairline);border-radius:14px;cursor:pointer;width:100%;text-align:left;color:var(--ink)}
+.hcircle{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-style:italic;font-size:15px;color:#fff}
+.ctxbar .nm{font-weight:600;font-size:15px}.ctxbar .sub{font-size:12px;color:var(--ink2)}
+.ctxbar .chev{margin-left:auto;color:var(--ink2);font-size:18px}
+.viewport{flex:1;overflow-y:auto;overscroll-behavior:contain;position:relative}
+.view{display:none;padding:16px 16px 120px;animation:fadeUp .2s ease-out}
+.view.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view{animation:none}.push{transition:none}.sheet{transition:none}}
+.stitle{font-family:var(--serif);font-size:28px;font-weight:400;margin:4px 0 2px}
+.ssub{color:var(--ink2);font-size:14px;margin-bottom:16px}
+.sec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);
+  margin:20px 0 10px}
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;margin-bottom:12px;
+  position:relative;overflow:hidden}
+.card .spine{position:absolute;left:0;top:0;bottom:0;width:3px}
+.card.emergency .spine{background:var(--emergency)}
+.card.approval .spine{background:var(--brand)}
+.card.urgent .spine{background:var(--urgent)}
+.card.fyi .spine{background:var(--hairline)}
+.card .in{padding:14px 16px 14px 19px}
+.badge{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px}
+.card.emergency .badge{color:var(--emergency)}.card.approval .badge{color:var(--brand)}
+.card.urgent .badge{color:var(--urgent)}.card.fyi .badge{color:var(--ink2)}
+.card h3{font-size:18px;font-weight:600;line-height:1.3;margin-bottom:4px}
+.card .what{font-size:14px;color:var(--ink2);line-height:1.45}
+.card .why{font-size:13px;color:var(--ink2);margin-top:8px;line-height:1.45;
+  border-top:1px dashed var(--hairline);padding-top:8px}
+.card .why b{color:var(--ink);font-weight:600}
+.cost{font-size:22px;font-weight:700;margin-top:10px}
+.cost .lbl{display:block;font-size:12px;font-weight:400;color:var(--ink2);margin-bottom:2px}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions .grow{flex:1}
+.btn{border:none;cursor:pointer;font-family:var(--sans);font-size:15px;font-weight:600;
+  border-radius:999px;min-height:48px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center}
+.btn.primary{background:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--hairline)}
+.btn.text{background:transparent;color:var(--ink2);min-height:44px}
+.btn.sm{min-height:40px;font-size:14px;padding:0 16px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+.undobar{display:flex;align-items:center;gap:10px;background:var(--ai-tint);border-radius:12px;
+  padding:12px 14px;margin-top:12px;font-size:14px}
+.undobar .t{font-weight:600}
+.undobar button{margin-left:auto;background:none;border:none;color:var(--brand);font-weight:700;
+  font-size:14px;cursor:pointer;text-decoration:underline;white-space:nowrap}
+.sent-note{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:600;font-size:14px;
+  background:var(--ai-tint);border-radius:12px;padding:12px 14px;margin-top:12px}
+.expand-hint{font-size:13px;color:var(--brand);font-weight:600;margin-top:8px}
+.hrow{display:flex;gap:12px;padding:12px 2px;border-bottom:1px solid var(--hairline);align-items:flex-start}
+.hrow .chk{width:24px;height:24px;border-radius:50%;background:var(--ok);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.hrow .tx{font-size:14px;line-height:1.45}.hrow .tx .w{color:var(--ink2);font-size:13px;display:block;margin-top:2px}
+.hrow .when{margin-left:auto;font-size:12px;color:var(--ink2);flex:none}
+.empty{text-align:center;padding:48px 24px}
+.empty .wordmark{font-size:34px;margin-bottom:8px}
+.empty p{color:var(--ink2);font-size:15px}
+.crumb{font-size:13px;color:var(--ink2);margin-bottom:10px}
+.crumb b{color:var(--ink)}
+.thread{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
+.bub{max-width:82%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.45}
+.bub.them{background:var(--surface);border:1px solid var(--hairline);align-self:flex-start;border-bottom-left-radius:6px}
+.bub.ai{background:var(--ai-tint);align-self:flex-start;border-bottom-left-radius:6px}
+.bub .ailabel{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;color:var(--ink2);margin-bottom:4px}
+.bub.me{background:var(--brand);color:var(--brand-ink);align-self:flex-end;border-bottom-right-radius:6px}
+.bub .melabel{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;opacity:.85;margin-bottom:3px}
+.bub .tm{display:block;font-size:11px;opacity:.65;margin-top:4px}
+.draft{border:1px dashed var(--brand);border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px}
+.draft .dlbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brand);text-transform:uppercase;margin-bottom:6px}
+.takebar{position:sticky;bottom:0;background:var(--bg);padding:10px 16px 18px;border-top:1px solid var(--hairline)}
+.compose{display:none;gap:8px}
+.takebar.taken .compose{display:flex}
+.takebar.taken #takeoverBtn{display:none}
+.cfield{flex:1;border:1px solid var(--hairline);border-radius:999px;background:var(--surface);
+  padding:12px 16px;font-size:15px;font-family:var(--sans);color:var(--ink)}
+.handback{display:none;margin-top:8px;text-align:center}
+.takebar.taken .handback{display:block}
+.handback button{background:var(--ai-tint);border:1px solid var(--hairline);border-radius:999px;
+  padding:8px 18px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.ruleslink{display:block;text-align:center;font-size:13px;color:var(--brand);margin-top:8px;
+  background:none;border:none;cursor:pointer;width:100%}
+.photo{border-radius:16px;overflow:hidden;border:1px solid var(--hairline);margin-bottom:14px;background:var(--surface)}
+.photo svg{display:block;width:100%;height:auto}
+.photo .cap{font-size:12px;color:var(--ink2);padding:8px 14px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--hairline);font-size:14px}
+.kv .k{color:var(--ink2)}.kv .v{text-align:right;font-weight:500}
+.vendorcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:14px 16px;margin-top:12px}
+.stickybar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--hairline);
+  padding:12px 16px 20px;display:flex;flex-direction:column;gap:8px}
+.stickybar .row{display:flex;gap:8px}
+.lrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hairline);
+  border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;color:var(--ink);width:100%;text-align:left;
+  font-family:var(--sans);font-size:15px}
+.lrow .tt{font-weight:600}.lrow .ss{font-size:13px;color:var(--ink2);margin-top:2px}
+.lrow .chev{margin-left:auto;color:var(--ink2)}
+.pill{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;
+  border-radius:999px;border:1px solid var(--hairline);color:var(--ink2);flex:none}
+.pill.pref{color:var(--brand);border-color:var(--brand)}
+.dotunread{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none}
+.scrim{position:absolute;inset:0;background:var(--scrim);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:100;background:var(--surface);
+  border-radius:24px 24px 0 0;padding:10px 20px 28px;transform:translateY(105%);transition:transform .3s ease-out;
+  max-height:78%;overflow-y:auto}
+.sheet.on{transform:translateY(0)}
+.grip{width:40px;height:4px;border-radius:2px;background:var(--hairline);margin:6px auto 14px}
+.sheet h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px}
+.sheet .shsub{font-size:13px;color:var(--ink2);margin-bottom:14px}
+.hsrow{display:flex;align-items:center;gap:12px;padding:12px 4px;width:100%;
+  cursor:pointer;background:none;border:none;border-bottom:1px solid var(--hairline);
+  font-family:var(--sans);color:var(--ink);text-align:left;font-size:15px}
+.hsrow:last-child{border-bottom:none}
+.hsrow .tick{margin-left:auto;color:var(--brand);font-weight:700}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink2)}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--hairline);border-radius:12px;
+  padding:12px 14px;font-size:15px;font-family:var(--sans);background:var(--bg);color:var(--ink)}
+textarea{resize:vertical;min-height:70px}
+.seg{display:flex;background:var(--ai-tint);border-radius:999px;padding:4px;gap:4px}
+.seg button{flex:1;border:none;background:none;border-radius:999px;padding:10px;font-size:14px;font-weight:600;
+  color:var(--ink2);cursor:pointer;font-family:var(--sans)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.setrow{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--hairline)}
+.setrow .t{font-weight:600;font-size:15px}.setrow .d{font-size:13px;color:var(--ink2);margin-top:2px}
+.stepper{display:flex;align-items:center;gap:12px;margin-left:auto}
+.stepper button{width:40px;height:40px;border-radius:50%;border:1px solid var(--hairline);background:var(--surface);
+  font-size:20px;color:var(--ink);cursor:pointer}
+.stepper .val{font-size:20px;font-weight:700;min-width:76px;text-align:center}
+.switch{margin-left:auto;width:52px;height:32px;border-radius:999px;background:var(--hairline);border:none;
+  cursor:pointer;position:relative;transition:background .2s;flex:none}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
+  background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.on{background:var(--brand)}.switch.on::after{left:23px}
+.numcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:16px;
+  text-align:center;margin-bottom:16px}
+.numcard .n{font-size:26px;font-weight:700;letter-spacing:.02em;margin:4px 0}
+.numcard .cap{font-size:12px;color:var(--ink2)}
+.wave{display:flex;align-items:center;gap:3px;height:34px;margin:10px 0}
+.wave i{width:3px;background:var(--emergency);border-radius:2px;opacity:.75}
+.playbtn{width:44px;height:44px;border-radius:50%;background:var(--emergency);color:#fff;border:none;
+  font-size:16px;cursor:pointer;flex:none}
+.transcript{background:var(--ai-tint);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;
+  font-style:italic;margin-top:8px}
+.tabs{position:absolute;left:0;right:0;bottom:0;z-index:50;background:var(--surface);
+  border-top:1px solid var(--hairline);display:flex;padding:8px 4px calc(10px + env(safe-area-inset-bottom))}
+.tab{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:11px;color:var(--ink2);cursor:pointer;font-family:var(--sans);font-weight:500;padding:4px}
+.tab .ic{font-size:20px}
+.tab.on{color:var(--brand);font-weight:700}
+.toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);z-index:180;
+  background:var(--ink);color:var(--bg);font-size:14px;font-weight:500;padding:12px 20px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;max-width:92%}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.callme-note{background:var(--ai-tint);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:12px;display:none}
+.callme-note.on{display:block}
+.hidden{display:none!important}
+.mt8{margin-top:8px}.mt16{margin-top:16px}
+.small{font-size:13px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="rail" id="rail"></div>
+  <div class="phone" id="phone">
+    <div class="splash" id="splash">
+      <div class="wordmark big">Surely</div>
+      <div class="tag">Surely. It'll get done.</div>
+    </div>
+    <div class="push" id="push">
+      <div class="dot">S</div>
+      <div><b>SURELY</b><p>Leak under the kitchen sink &middot; Unit A &mdash; tap to review</p></div>
+      <div class="now">now</div>
+    </div>
+    <div class="hdr">
+      <div class="row1">
+        <div class="wordmark mid">Surely</div>
+        <div class="icons">
+          <button class="iconbtn" id="themeBtn" title="Appearance">&#9790;</button>
+          <button class="iconbtn" id="gearBtn" title="AI settings">&#9881;</button>
+        </div>
+      </div>
+      <button class="ctxbar" id="houseBtn">
+        <div class="hcircle" id="houseCircle">UD</div>
+        <div><div class="nm" id="houseName">Udell Duplex</div><div class="sub" id="houseSub">2 doors &middot; Indianapolis 46208</div></div>
+        <div class="chev">&#8250;</div>
+      </button>
+    </div>
+    <div class="viewport" id="viewport">
+      <!-- TODAY -->
+      <div class="view on" id="v-today">
+        <div class="stitle">Today</div>
+        <div class="ssub" id="todayDate">Sunday, October 4</div>
+        <div id="needsWrap">
+          <div class="sec">Needs you</div>
+          <div id="needs"></div>
+        </div>
+        <div id="emptyWrap" class="hidden">
+          <div class="empty">
+            <div class="wordmark">Surely</div>
+            <p><b>All quiet. Surely's got it.</b></p>
+            <p class="mt8">Nothing needs a decision right now.</p>
+          </div>
+        </div>
+        <div class="sec">Handled for you</div>
+        <div id="handled"></div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="view" id="v-messages">
+        <div class="stitle">Messages</div>
+        <div class="ssub">Every thread, one place. The AI answers first &mdash; you can jump in anytime.</div>
+        <div id="msgList"></div>
+      </div>
+
+      <!-- THREAD -->
+      <div class="view" id="v-thread">
+        <div class="crumb"><b id="thHouse">Udell Duplex</b> &nbsp;&rsaquo;&nbsp; <span id="thUnit">Unit B</span> &nbsp;&rsaquo;&nbsp; <span id="thName">Marcus Webb</span></div>
+        <div class="stitle" style="font-size:22px" id="thTitle">Rent timing</div>
+        <div class="thread" id="threadBody"></div>
+        <div class="draft hidden" id="aiDraft">
+          <div class="dlbl">AI draft &middot; waiting on you</div>
+          <div id="aiDraftText"></div>
+          <div class="actions"><button class="btn primary sm grow" id="draftApprove">Approve reply</button>
+          <button class="btn ghost sm" id="draftThread">Open in Today</button></div>
+        </div>
+        <div class="takebar" id="takebar">
+          <button class="btn primary block" id="takeoverBtn">Take over</button>
+          <div class="compose">
+            <input class="cfield" id="composeField" placeholder="Type as the Surely number&hellip;">
+            <button class="btn primary" id="sendBtn" style="min-height:48px">Send</button>
+          </div>
+          <div class="handback"><button id="handbackBtn">Hand back to AI</button></div>
+          <button class="ruleslink" id="rulesLink">View the house rules the AI follows</button>
+        </div>
+      </div>
+      <!-- TICKET -->
+      <div class="view" id="v-ticket">
+        <div class="crumb"><b>Udell Duplex</b> &nbsp;&rsaquo;&nbsp; Unit A &nbsp;&rsaquo;&nbsp; Ticket #1042</div>
+        <div class="stitle" style="font-size:24px">Leak under the kitchen sink</div>
+        <div class="ssub">Reported by Denise Carter &middot; today, 9:02 AM</div>
+        <div class="photo">
+          <svg viewBox="0 0 358 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tenant photo of water under the kitchen sink">
+            <rect width="358" height="190" fill="#3a332b"/>
+            <rect x="0" y="0" width="358" height="46" fill="#2c2620"/>
+            <rect x="150" y="46" width="58" height="70" rx="6" fill="#8f8a80"/>
+            <rect x="163" y="116" width="32" height="44" fill="#6f6a60"/>
+            <path d="M179 160 q4 12 -6 18" stroke="#7fb3d5" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="173" cy="184" r="4" fill="#7fb3d5"/>
+            <ellipse cx="120" cy="172" rx="52" ry="10" fill="#4d6a80" opacity=".8"/>
+            <ellipse cx="250" cy="178" rx="34" ry="8" fill="#4d6a80" opacity=".6"/>
+            <rect x="230" y="60" width="90" height="100" rx="8" fill="#54483c"/>
+            <text x="16" y="176" font-family="sans-serif" font-size="12" fill="#cfc8bd">tenant photo</text>
+          </svg>
+          <div class="cap">Tenant photo &middot; water pooling under the sink cabinet</div>
+        </div>
+        <div class="card urgent"><div class="spine"></div><div class="in">
+          <div class="badge">Urgent</div>
+          <h3 style="font-size:16px">Why this triage</h3>
+          <p class="what">Active drip at a supply line can damage the cabinet and subfloor within hours &mdash; it can't wait for the next visit.</p>
+        </div></div>
+        <div class="vendorcard">
+          <div class="sec" style="margin-top:0">Suggested vendor</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="hcircle" style="background:#3E7C4F">LH</div>
+            <div><div class="tt" style="font-weight:600">Luis Herrera</div>
+            <div class="ss small">Plumbing &middot; $90/hr &middot; <span class="pill pref">Preferred</span></div></div>
+          </div>
+          <p class="small mt8"><b>Why Luis:</b> fixed this same sink in March, knows the layout, and answers on Sundays.</p>
+          <div class="cost money"><span class="lbl">Estimated cost &mdash; shown before you decide</span>$180&ndash;$240</div>
+          <p class="small mt8">Under your $250 approval limit. You pay Luis directly, as today &mdash; no money moves in the app.</p>
+        </div>
+        <div class="callme-note" id="callmeNote">&#9742; Calling you now&hellip; pick up and the AI will brief you on the leak.</div>
+        <div class="stickybar" id="ticketBar">
+          <div class="row">
+            <button class="btn primary grow" id="ticketApprove">Approve</button>
+            <button class="btn text" id="ticketDecline">Decline</button>
+          </div>
+          <button class="btn ghost block" id="ticketCallme">Call me instead</button>
+          <div class="undobar hidden" id="ticketUndo"><span class="t">Vendor dispatched &middot; <span class="num" id="ticketUndoT">60</span>s</span><button id="ticketUndoBtn">Undo</button></div>
+        </div>
+      </div>
+      <!-- HOUSES -->
+      <div class="view" id="v-houses">
+        <div class="stitle">Houses</div>
+        <div class="ssub">What's the state of your doors? Every number taps through to its source.</div>
+        <div id="houseList"></div>
+      </div>
+      <div class="view" id="v-housedetail">
+        <div class="crumb"><b>Houses</b> &nbsp;&rsaquo;&nbsp; <span id="hdName">Udell Duplex</span></div>
+        <div class="stitle" style="font-size:24px" id="hdTitle">Udell Duplex</div>
+        <div class="ssub" id="hdSub"></div>
+        <div class="sec">Units</div>
+        <div id="unitList"></div>
+        <div class="sec">House rules <span style="font-weight:400;text-transform:none;letter-spacing:0">&middot; plain language, the AI follows these</span></div>
+        <div id="ruleList"></div>
+        <button class="btn ghost block mt16" id="editRulesBtn">Edit house rules</button>
+      </div>
+
+      <!-- VENDORS -->
+      <div class="view" id="v-vendors">
+        <div class="stitle">Vendors</div>
+        <div class="ssub">Who fixes things. Preferred is suggested first &mdash; backup only if you say so.</div>
+        <div id="vendorList"></div>
+        <button class="btn primary block mt16" id="addVendorBtn">+ Add vendor</button>
+        <p class="small mt8" style="text-align:center">Takes under a minute. Calls and texts go out from your Surely number.</p>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="v-settings">
+        <div class="stitle">AI settings</div>
+        <div class="ssub">What the AI may do without you. These are ceilings, not defaults.</div>
+        <div class="setrow">
+          <div><div class="t">Appearance</div><div class="d">Warm dark, not inverted gray</div></div>
+          <button class="switch" id="darkSwitch" aria-label="Dark mode"></button>
+        </div>
+        <div class="setrow" style="display:block">
+          <div class="t">Approval limit</div>
+          <div class="d">The AI can never approve spending above this &mdash; no exceptions.</div>
+          <div class="stepper mt8" style="margin-left:0;justify-content:flex-start">
+            <button id="limDown">&minus;</button><div class="val money" id="limVal">$250</div><button id="limPlus">+</button>
+          </div>
+        </div>
+        <div class="setrow">
+          <div><div class="t">Quiet hours</div><div class="d">10 PM &ndash; 7 AM &middot; non-emergencies wait. Emergencies always break through.</div></div>
+          <button class="switch on" id="qhSwitch" aria-label="Quiet hours"></button>
+        </div>
+        <div class="setrow" style="display:block">
+          <div class="t">Tone</div>
+          <div class="d">How the AI sounds to tenants. Pick one &mdash; no freeform.</div>
+          <div class="seg mt8" id="toneSeg">
+            <button class="on">Warm &amp; brief</button><button>Professional</button><button>Friendly neighbor</button>
+          </div>
+          <p class="small mt8" id="toneExample">&ldquo;Got it &mdash; I'll take care of it.&rdquo;</p>
+        </div>
+        <div class="sec">Escalation contacts</div>
+        <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#D95D1E;width:34px;height:34px;font-size:13px">D</div>
+          <div><div class="tt">David &mdash; you</div><div class="ss">Primary &middot; text + call</div></div><span class="pill pref">1st</span></div>
+        <div class="lrow" style="cursor:default"><div class="hcircle" style="background:#6E655A;width:34px;height:34px;font-size:13px">M</div>
+          <div><div class="tt">Mom</div><div class="ss">Backup &middot; text + call after 30 min no-ack</div></div><span class="pill">2nd</span></div>
+        <div class="sec">Push notifications</div>
+        <div class="setrow">
+          <div><div class="t">Web Push</div><div class="d" id="pushStatusLine">Not subscribed in this demo</div></div>
+          <button class="btn ghost sm" style="margin-left:auto" id="openPushLab">Open push lab</button>
+        </div>
+        <div class="sec">About</div>
+        <div class="empty" style="padding:24px">
+          <div class="wordmark" style="font-size:30px">Surely</div>
+          <p>Surely. It'll get done.</p>
+          <p class="small mt8">Prototype &middot; fake data, nothing is real yet.</p>
+          <button class="btn ghost sm mt16" id="replayPush">Replay the push demo</button>
+        </div>
+      </div>
+
+      <!-- NUMBER -->
+      <div class="view" id="v-number">
+        <div class="stitle">Number</div>
+        <div class="ssub">What came in on the Surely line.</div>
+        <div class="numcard">
+          <div class="cap">YOUR SURELY NUMBER</div>
+          <div class="n num">(317) 555-0148</div>
+          <div class="cap">Tenants and vendors only ever see this number &mdash; never your personal one.</div>
+          <div class="actions" style="justify-content:center">
+            <button class="btn ghost sm" id="numTextBtn">Text</button>
+            <button class="btn ghost sm" id="numCallBtn">Call</button>
+          </div>
+        </div>
+        <div class="sec">Voicemail &middot; transcribed</div>
+        <div class="card emergency vmail"><div class="spine"></div><div class="in">
+          <div class="badge">Emergency &middot; voicemail</div>
+          <h3>Possible gas smell &mdash; Unit B</h3>
+          <p class="what">Marcus Webb &middot; today, 2:14 AM &middot; 0:42</p>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="playbtn" id="vmPlay">&#9654;</button>
+            <div class="wave" id="vmWave"></div>
+            <span class="small num" id="vmTime">0:42</span>
+          </div>
+          <div class="transcript">&ldquo;Hey, it's Marcus in B. Sorry to call so late &mdash; I smell gas near the furnace in the utility closet. It's faint but it's definitely there. Let me know.&rdquo;</div>
+          <p class="why"><b>Why this triage:</b> any gas smell is treated as life-safety until ruled out &mdash; the AI texted and called you at 2:14 AM.</p>
+          <div class="actions">
+            <button class="btn primary sm grow" id="vmCallback">Call Marcus back</button>
+            <button class="btn text sm" id="vmHandled">Mark handled</button>
+          </div>
+        </div></div>
+        <div class="sec">Recent activity</div>
+        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
+          <div class="tx">Text thread &middot; Denise Carter, Unit A<span class="w">Leak photos received &middot; 9:02 AM</span></div></div>
+        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9742;</div>
+          <div class="tx">Outgoing call &middot; Luis Herrera<span class="w">2 min &middot; 8:40 AM</span></div></div>
+        <div class="hrow"><div class="chk" style="background:var(--hairline);color:var(--ink)">&#9993;</div>
+          <div class="tx">Text thread &middot; Marcus Webb, Unit B<span class="w">Rent timing question &middot; yesterday</span></div></div>
+      </div>
+      <!-- PUSH LAB -->
+      <div class="view" id="v-pushlab">
+        <style>
+          .plab-check{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid var(--hairline);font-size:14px}
+          .plab-check .box{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--hairline);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent}
+          .plab-check.done .box{background:var(--ok);border-color:var(--ok);color:#fff}
+          .plab-check.done{color:var(--ink2)}
+          .android{background:#1f1f1f;border-radius:18px;padding:14px;color:#e8e8e8;margin-top:12px;display:none;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+          .android.show{display:block;animation:fadeUp .25s ease-out}
+          .android .ahead{display:flex;gap:10px;align-items:center}
+          .android .aicon{width:36px;height:36px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:19px;color:#fff;flex:none}
+          .android .aname{font-size:12px;color:#bdbdbd}.android .aname b{color:#e8e8e8;font-weight:600}
+          .android .atitle{font-size:15px;font-weight:600;margin-top:10px}
+          .android .abody{font-size:13.5px;color:#c9c9c9;margin-top:4px;line-height:1.45}
+          .android .atag{font-size:11px;color:#8f8f8f;margin-top:8px;font-family:ui-monospace,monospace}
+          .android .abtns{display:flex;gap:8px;margin-top:12px;border-top:1px solid #3a3a3a;padding-top:4px}
+          .android .abtns button{flex:1;background:none;border:none;color:#f5b98a;font-size:14px;font-weight:700;letter-spacing:.04em;padding:12px 0;cursor:pointer;text-transform:uppercase}
+          .android .abtns button:active{background:#2c2c2c;border-radius:8px}
+          .plab-log{background:#14110D;color:#d8d2c6;border-radius:14px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;line-height:1.7;max-height:260px;overflow-y:auto;margin-top:12px}
+          .plab-log .ok{color:#6FAE7E}.plab-log .dim{color:#8a8378}
+          .permcard{background:var(--surface);border:1px solid var(--hairline);border-radius:16px;padding:14px 16px;margin-top:12px}
+          details.plab-code{margin-top:12px;font-size:13px}
+          details.plab-code summary{cursor:pointer;color:var(--brand);font-weight:600}
+          details.plab-code pre{background:var(--ai-tint);border-radius:12px;padding:12px;font-size:11.5px;overflow-x:auto;margin-top:8px;line-height:1.55}
+        </style>
+        <button class="linklike" id="pushlabBack" style="margin-bottom:6px">&lsaquo; AI settings</button>
+        <div class="stitle">Push lab</div>
+        <div class="ssub">Web Push spike, demonstrated with local stubs &mdash; no backend, no network. This is the exact contract Phase 5 will implement against David's real Pixel 7.</div>
+        <div class="sec" style="margin-top:8px">Checklist</div>
+        <div id="plabChecks">
+          <div class="plab-check" data-k="perm"><span class="box">✓</span><span>Permission request UX + subscribe / unsubscribe toggle</span></div>
+          <div class="plab-check" data-k="render"><span class="box">✓</span><span>Notification renders with exactly Approve / Decline &mdash; text-only, 2 max (Android ignores action icons)</span></div>
+          <div class="plab-check" data-k="headless"><span class="box">✓</span><span>Approve fires <span class="num">notificationclick {action:'approve'}</span>, hits the stub endpoint, closes &mdash; no window opens (headless)</span></div>
+          <div class="plab-check" data-k="deep"><span class="box">✓</span><span>Body tap opens / focuses the PWA at <span class="num">/today?card=leak</span> with the card expanded</span></div>
+          <div class="plab-check" data-k="stale"><span class="box">✓</span><span>Re-push with the same <span class="num">tag</span> replaces &mdash; never stacks</span></div>
+        </div>
+        <div class="sec">1 &middot; Permission &amp; subscription</div>
+        <div class="permcard">
+          <div class="kv"><span class="k">Browser permission</span><span class="v num" id="plabPerm">default (stub)</span></div>
+          <div class="kv" style="border-bottom:none"><span class="k">Push subscription</span><span class="v" id="plabSub">unsubscribed</span></div>
+          <div class="actions">
+            <button class="btn ghost sm grow" id="plabPermBtn">Request permission</button>
+            <button class="btn ghost sm grow" id="plabSubBtn" disabled>Subscribe</button>
+          </div>
+          <p class="small mt8">Real OS prompts need https + a service worker; this file runs from disk, so the prompt is stubbed. The toggle shape is what ships.</p>
+        </div>
+        <div class="sec">2 &middot; Send a test push</div>
+        <button class="btn primary block" id="plabSend" disabled>Send test push</button>
+        <div class="android" id="plabNotif">
+          <div class="ahead"><div class="aicon">S</div><div class="aname"><b>Surely</b> &middot; <span id="plabWhen">now</span></div></div>
+          <div class="atitle">Approval needed &middot; <span class="money">$180&ndash;$240</span></div>
+          <div class="abody" id="plabBody">Leak under kitchen sink &middot; Unit A &mdash; Luis Herrera (preferred). Tap to review, or decide right here.</div>
+          <div class="atag">tag: card-leak &middot; urgency: high &middot; actions: 2/2 max</div>
+          <div class="abtns">
+            <button id="plabApprove">Approve</button>
+            <button id="plabDecline">Decline</button>
+          </div>
+        </div>
+        <div class="actions mt8">
+          <button class="btn ghost sm grow" id="plabBodyTap" disabled>Tap notification body</button>
+          <button class="btn ghost sm grow" id="plabRepush" disabled>Re-push same tag</button>
+        </div>
+        <p class="small mt8">Text-only buttons, 1&ndash;2 words each &mdash; Android renders no icons on actions, so labels carry the decision.</p>
+        <div class="sec">Event log</div>
+        <div class="plab-log" id="plabLog"><div class="dim">— waiting for the first push —</div></div>
+        <details class="plab-code">
+          <summary>The service-worker contract (Phase 5)</summary>
+          <pre>self.addEventListener('notificationclick', e =&gt; {
+  const d = e.notification.data; // {approveUrl, declineUrl, deepLink}
+  e.notification.close();
+  if (e.notification.tag) {/* re-push replaced in place */}
+  if (e.action === 'approve' || e.action === 'decline') {
+    // headless: no window opens
+    e.waitUntil(fetch(d[e.action + 'Url'],
+      {method:'POST', credentials:'include'}));
+  } else {
+    // body tap → focus or open the PWA at the card
+    e.waitUntil(clients.matchAll({type:'window'})
+      .then(ws =&gt; ws.length
+        ? ws[0].focus().then(c =&gt; c.navigate(d.deepLink))
+        : clients.openWindow(d.deepLink)));
+  }
+});</pre>
+        </details>
+      </div>
+    </div><!-- /viewport -->
+
+    <div class="scrim" id="scrim"></div>
+
+    <div class="sheet" id="sheet-houseswitch">
+      <div class="grip"></div>
+      <h2>Switch house</h2>
+      <div class="shsub">Houses are servers. Pick one.</div>
+      <div id="switchList"></div>
+    </div>
+
+    <div class="sheet" id="sheet-rules">
+      <div class="grip"></div>
+      <h2>House rules</h2>
+      <div class="shsub">Read-only here &mdash; this is what the AI follows in this thread.</div>
+      <div id="rulesReadonly"></div>
+      <button class="btn primary block mt16" id="rulesClose">Got it</button>
+    </div>
+
+    <div class="sheet" id="sheet-editrules">
+      <div class="grip"></div>
+      <h2>Edit house rules</h2>
+      <div class="shsub" id="editRulesSub">Plain language. The AI reads these before every reply.</div>
+      <div id="rulesEdit"></div>
+      <button class="btn primary block mt16" id="saveRules">Save rules</button>
+    </div>
+
+    <div class="sheet" id="sheet-addvendor">
+      <div class="grip"></div>
+      <h2>Add vendor</h2>
+      <div class="shsub">Under a minute. They only ever see your Surely number.</div>
+      <div class="field"><label>Name</label><input id="nvName" placeholder="e.g. Ana Ruiz"></div>
+      <div class="field"><label>Trade</label><input id="nvTrade" placeholder="e.g. HVAC"></div>
+      <div class="field"><label>Phone</label><input id="nvPhone" placeholder="(555) 000-0000" inputmode="tel"></div>
+      <div class="field"><label>Typical rate</label><input id="nvRate" placeholder="e.g. $95/hr"></div>
+      <div class="field"><label>Role</label><div class="seg" id="nvRole"><button class="on">Preferred</button><button>Backup</button></div></div>
+      <button class="btn primary block" id="nvSave">Add vendor</button>
+    </div>
+
+    <div class="sheet" id="sheet-numtext">
+      <div class="grip"></div>
+      <h2>Text from Surely</h2>
+      <div class="shsub">Sends from (317) 555-0148. Your personal number stays hidden.</div>
+      <div class="field"><label>To</label><input id="ntTo" placeholder="Name or number"></div>
+      <div class="field"><label>Message</label><textarea id="ntMsg" placeholder="Type your message&hellip;"></textarea></div>
+      <button class="btn primary block" id="ntSend">Send</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="today"><span class="ic">&#9783;</span>Today</button>
+      <button class="tab" data-v="messages"><span class="ic">&#9993;</span>Messages</button>
+      <button class="tab" data-v="houses"><span class="ic">&#8962;</span>Houses</button>
+      <button class="tab" data-v="vendors"><span class="ic">&#128736;</span>Vendors</button>
+      <button class="tab" data-v="number"><span class="ic">&#9742;</span>Number</button>
+    </div>
+  </div><!-- /phone -->
+</div><!-- /stage -->
+
+<script>
+"use strict";
+/* ---------- fake data: David's world, 2 properties, 3 doors ---------- */
+const HOUSES = [
+  {id:'udell', name:'Udell Duplex', short:'UD', color:'#D95D1E', doors:'2 doors', area:'Indianapolis 46208',
+   rules:['Rent is due the 1st. 5-day grace, no late fee inside it.','Quiet hours 10 PM – 7 AM.','No smoking indoors.','Tenant handles light bulbs and furnace filters; everything else, text us.']},
+  {id:'cottage', name:'Garfield Park Cottage', short:'GC', color:'#3E7C4F', doors:'1 door', area:'Indianapolis 46203',
+   rules:['Rent is due the 1st. 5-day grace, no late fee inside it.','Quiet hours 10 PM – 7 AM.','Yard kept tidy; mowing is on us May–Sep.']}
+];
+const UNITS = [
+  {house:'udell', unit:'Unit A', tenant:'Denise Carter', lease:'Jan 1, 2026 – Dec 31, 2026', open:1},
+  {house:'udell', unit:'Unit B', tenant:'Marcus Webb', lease:'Mar 1, 2026 – Feb 28, 2027', open:0},
+  {house:'cottage', unit:'Whole house', tenant:'Priya Nair', lease:'Jun 1, 2026 – May 31, 2027', open:0}
+];
+const VENDORS = [
+  {name:'Luis Herrera', trade:'Plumbing', rate:'$90/hr', role:'preferred', props:'Udell Duplex · Cottage', init:'LH', color:'#3E7C4F'},
+  {name:"Ray's Rooter", trade:'Plumbing', rate:'$110/hr', role:'backup', props:'Udell Duplex', init:'RR', color:'#6E655A'}
+];
+const state = {
+  house:'udell', view:'today', limit:250, dark:false,
+  needs:[
+    {id:'gas', kind:'emergency', badge:'Emergency', title:'Possible gas smell — Unit B',
+     what:'Marcus left a 2:14 AM voicemail: "smell of gas near the furnace." You were texted and called instantly.',
+     why:'<b>Why you\'re seeing this:</b> any gas smell is life-safety until ruled out. Confirm you\'re handling it, or call him back from the Number tab.',
+     state:'open'},
+    {id:'leak', kind:'approval', badge:'Approval needed', title:'Leak under the kitchen sink — Unit A',
+     what:'Denise sent photos. Active drip at the supply line.',
+     why:'<b>Why Luis:</b> your preferred plumber, fixed this same sink in March, and the <span class="money">$180–$240</span> estimate is under your <span class="money">$250</span> limit.',
+     cost:'$180–$240', state:'open'},
+    {id:'rent', kind:'urgent', badge:'Urgent', title:'Rent timing question — Unit B',
+     what:'Marcus asks to pay on the 3rd this month — his payday moved.',
+     why:'<b>Why you\'re seeing this:</b> your grace rule allows 5 days, so the AI drafted a reply. It only sends if you approve.',
+     draft:'Noted — rent on the 3rd this month, back to the 1st after. 👍', state:'open'},
+    {id:'lease', kind:'fyi', badge:'FYI', title:'Cottage lease renews in 60 days',
+     what:'Priya\'s lease ends May 31. Nothing is due yet.',
+     why:'<b>Why you\'re seeing this:</b> so it doesn\'t sneak up on you.', state:'open'}
+  ],
+  handled:[
+    {t:'Slow faucet drip at the Cottage — followed up with Priya, cosmetic only, added to the watchlist.', w:'No repair needed. Folded into the next visit.', when:'Fri'},
+    {t:'Answered Denise\'s quiet-hours question.', w:'Per your quiet-hours rule (10 PM – 7 AM).', when:'Thu'},
+    {t:'Transcribed the 2:14 AM voicemail from Marcus.', w:'Flagged as a possible emergency and called you.', when:'2:14 AM'}
+  ]
+};
+let undoTimer = null, undoLeft = 0;
+/* ================= core ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const viewport=$('#viewport');
+let toastT=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600);}
+function go(v){state.view=v;$$('.view').forEach(x=>x.classList.remove('on'));
+  const el=$('#v-'+v); if(el)el.classList.add('on');
+  $$('#tabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));
+  viewport.scrollTop=0;}
+$$('#tabs .tab').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+$('#gearBtn').addEventListener('click',()=>go('settings'));
+
+/* theme */
+function setDark(d){state.dark=d;document.documentElement.dataset.theme=d?'dark':'light';
+  $('#darkSwitch').classList.toggle('on',d);$('#themeBtn').innerHTML=d?'&#9788;':'&#9790;';}
+$('#themeBtn').addEventListener('click',()=>setDark(!state.dark));
+$('#darkSwitch').addEventListener('click',()=>setDark(!state.dark));
+
+/* rail (desktop) + context bar + house switcher */
+function house(){return HOUSES.find(h=>h.id===state.house);}
+function renderRail(){const r=$('#rail');r.innerHTML='';
+  HOUSES.forEach((h,i)=>{const b=document.createElement('button');b.className='rc'+(h.id===state.house?' active':'');
+    b.style.background=h.color;b.textContent=h.short;b.title=h.name;
+    b.addEventListener('click',()=>setHouse(h.id));r.appendChild(b);
+    if(i<HOUSES.length-1){const d=document.createElement('div');d.className='rdiv';r.appendChild(d);}});}
+function renderCtx(){const h=house();$('#houseCircle').textContent=h.short;$('#houseCircle').style.background=h.color;
+  $('#houseName').textContent=h.name;$('#houseSub').textContent=h.doors+' · '+h.area;}
+function setHouse(id){state.house=id;renderRail();renderCtx();renderMsgs();closeSheets();toast('Switched to '+house().name);}
+function renderSwitchList(){const w=$('#switchList');w.innerHTML='';
+  HOUSES.forEach(h=>{const b=document.createElement('button');b.className='hsrow';
+    b.innerHTML=`<div class="hcircle" style="background:${h.color}">${h.short}</div><div><div style="font-weight:600">${h.name}</div><div class="small">${h.doors} · ${h.area}</div></div>${h.id===state.house?'<span class="tick">✓</span>':''}`;
+    b.addEventListener('click',()=>setHouse(h.id));w.appendChild(b);});}
+$('#houseBtn').addEventListener('click',()=>{renderSwitchList();openSheet('sheet-houseswitch');});
+
+/* sheets */
+function openSheet(id){$('#scrim').classList.add('on');$('#'+id).classList.add('on');}
+function closeSheets(){$('#scrim').classList.remove('on');$$('.sheet').forEach(s=>s.classList.remove('on'));}
+$('#scrim').addEventListener('click',closeSheets);
+$('#rulesClose').addEventListener('click',closeSheets);
+/* ================= Today ================= */
+const KIND_ORDER={emergency:0,approval:1,urgent:2,fyi:3};
+function openNeeds(){return state.needs.filter(c=>c.state==='open'||c.state==='dispatching')
+  .sort((a,b)=>KIND_ORDER[a.kind]-KIND_ORDER[b.kind]);}
+function renderNeeds(){
+  const w=$('#needs'), open=openNeeds();
+  $('#needsWrap').classList.toggle('hidden',open.length===0);
+  $('#emptyWrap').classList.toggle('hidden',open.length!==0);
+  w.innerHTML='';
+  open.forEach(c=>{
+    const d=document.createElement('div');d.className='card '+c.kind;d.id='card-'+c.id;
+    let inner=`<div class="spine"></div><div class="in"><div class="badge">${c.badge}</div><h3>${c.title}</h3><p class="what">${c.what}</p>`;
+    if(c.id==='leak'&&c.state==='open')
+      inner+=`<div class="cost money"><span class="lbl">Estimated cost — before you decide</span>${c.cost}</div><p class="small mt8">Luis Herrera · Plumbing (preferred) · you pay him directly</p>`;
+    inner+=`<p class="why">${c.why}</p>`;
+    if(c.state==='dispatching')
+      inner+=`<div class="undobar"><span class="t">Vendor dispatched · <span class="num" id="undoT-${c.id}">${undoLeft}</span>s</span><button data-act="undo" data-id="${c.id}">Undo</button></div>`;
+    else if(c.id==='leak')
+      inner+=`<div class="actions"><button class="btn primary grow" data-act="approve" data-id="leak">Approve</button><button class="btn text" data-act="decline" data-id="leak">Decline</button><button class="btn ghost" data-act="details" data-id="leak">Details</button></div>`;
+    else if(c.id==='rent')
+      inner+=`<div class="draft"><div class="dlbl">AI draft reply</div>“${c.draft}”</div><div class="actions"><button class="btn primary grow" data-act="approve-rent" data-id="rent">Approve reply</button><button class="btn ghost" data-act="thread" data-id="rent">Open thread</button></div>`;
+    else if(c.id==='gas')
+      inner+=`<div class="actions"><button class="btn primary grow" data-act="calltenant" data-id="gas">Call Marcus</button><button class="btn ghost" data-act="transcript" data-id="gas">Transcript</button><button class="btn text" data-act="handled" data-id="gas">Mark handled</button></div>`;
+    else if(c.id==='lease')
+      inner+=`<div class="actions"><button class="btn ghost grow" data-act="snooze" data-id="lease">Remind me in 30 days</button></div>`;
+    inner+=`</div>`;
+    d.innerHTML=inner;w.appendChild(d);
+  });
+}
+function renderHandled(){
+  const w=$('#handled');w.innerHTML='';
+  state.handled.slice(0,20).forEach(h=>{
+    const d=document.createElement('div');d.className='hrow';
+    d.innerHTML=`<div class="chk">✓</div><div class="tx">${h.t}<span class="w">${h.w}</span></div><div class="when">${h.when}</div>`;
+    w.appendChild(d);});
+}
+function resolveCard(id){const c=state.needs.find(x=>x.id===id);if(c)c.state='resolved';renderNeeds();renderHandled();}
+function pushHandled(t,w,when){state.handled.unshift({t,w,when:when||'now'});renderHandled();}
+
+/* leak approve / undo — shared by Today card, ticket screen, push lab */
+function approveLeak(){
+  const c=state.needs.find(x=>x.id==='leak');if(!c||c.state!=='open')return;
+  c.state='dispatching';undoLeft=60;renderNeeds();syncTicketBar();
+  clearInterval(undoTimer);
+  undoTimer=setInterval(()=>{
+    undoLeft--;
+    const a=$('#undoT-leak'),b=$('#ticketUndoT');if(a)a.textContent=undoLeft;if(b)b.textContent=undoLeft;
+    if(undoLeft<=0){clearInterval(undoTimer);
+      c.state='resolved';renderNeeds();
+      pushHandled('Luis Herrera dispatched — leak under the kitchen sink, Unit A (<span class="money">$180–$240</span>).','You approved the dispatch. Undo window expired.');
+      syncTicketBar();toast('Dispatch sent to Luis Herrera');}
+  },1000);
+}
+function undoLeak(){
+  clearInterval(undoTimer);
+  const c=state.needs.find(x=>x.id==='leak');if(c&&c.state==='dispatching'){c.state='open';}
+  renderNeeds();syncTicketBar();toast('Dispatch cancelled — nothing was sent');
+}
+$('#needs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const{id,act}=b.dataset;
+  if(act==='approve')approveLeak();
+  else if(act==='undo')undoLeak();
+  else if(act==='decline'){resolveCard(id);pushHandled('Declined the leak repair dispatch.','No vendor was contacted. The ticket stays open in Messages.');toast('Declined — ticket stays open');}
+  else if(act==='details')go('ticket');
+  else if(act==='approve-rent'){resolveCard(id);
+    pushHandled('Reply sent to Marcus — rent on the 3rd approved, one month only.','Per your 5-day grace rule. You approved the AI draft.');
+    THREADS.marcus.draft=null;
+    THREADS.marcus.msgs.push({from:'ai',text:'Noted — rent on the 3rd this month, back to the 1st after. 👍',tm:'now',note:'approved by you'});
+    toast('Reply sent from your Surely number');}
+  else if(act==='thread')openThread('marcus');
+  else if(act==='calltenant')toast('Calling Marcus from (317) 555-0148…');
+  else if(act==='transcript')go('number');
+  else if(act==='handled'){resolveCard(id);pushHandled('You confirmed the gas report is handled.','Emergency card cleared.');}
+  else if(act==='snooze'){resolveCard(id);pushHandled('Reminder set — Cottage lease renewal.','You\'ll see it again in 30 days.');toast('Snoozed for 30 days');}
+});
+function expandCard(id){
+  go('today');
+  setTimeout(()=>{const el=$('#card-'+id);if(!el)return;
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.boxShadow='0 0 0 3px var(--brand)';setTimeout(()=>el.style.boxShadow='',1600);},120);
+}
+/* ================= Messages & thread ================= */
+const THREADS={
+  marcus:{house:'udell',unit:'Unit B',name:'Marcus Webb',title:'Rent timing',unread:true,
+    draft:'Noted — rent on the 3rd this month, back to the 1st after. 👍',
+    msgs:[
+      {from:'them',text:'Hey — quick question. My payday moved to the 1st, so can I send rent on the 3rd this month instead of the 1st?',tm:'Yesterday 6:12 PM'},
+      {from:'ai',text:"Hi Marcus — that's fine. Your house rules give a 5-day grace period, so the 3rd is no problem. Want me to note it for this month?",tm:'Yesterday 6:13 PM'},
+      {from:'them',text:'Yes please, just this month. Thanks!',tm:'Yesterday 6:15 PM'}]},
+  denise:{house:'udell',unit:'Unit A',name:'Denise Carter',title:'Kitchen sink leak',unread:true,draft:null,
+    msgs:[
+      {from:'them',text:'Water under the sink again 😩 sent pics',tm:'Today 9:02 AM'},
+      {from:'ai',text:"Thanks Denise — I can see the drip at the supply line. I've flagged it for David and lined up Luis, our plumber. I'll confirm a time before anyone heads over.",tm:'Today 9:04 AM'},
+      {from:'them',text:'ok thanks',tm:'Today 9:05 AM'}]},
+  priya:{house:'cottage',unit:'Whole house',name:'Priya Nair',title:'Bathroom faucet drip',unread:false,draft:null,
+    msgs:[
+      {from:'them',text:'bathroom faucet drips a little, not urgent',tm:'Fri 2:40 PM'},
+      {from:'ai',text:"Noted — I'll keep an eye on it and fold it into the next visit. Text if it gets worse.",tm:'Fri 2:41 PM'}]},
+  luis:{house:'udell',unit:'Vendor',name:'Luis Herrera',title:'Plumber — preferred',unread:false,draft:null,vendor:true,
+    msgs:[
+      {from:'them',text:'On my way Thursday for the March visit — all good.',tm:'Thu 8:10 AM'},
+      {from:'ai',text:'Thanks Luis — see you Thursday.',tm:'Thu 8:11 AM'}]}
+};
+let curThread=null, takenOver=false;
+function renderMsgs(){
+  const w=$('#msgList');w.innerHTML='';
+  HOUSES.filter(h=>h.id===state.house).forEach(h=>{
+    const sec=document.createElement('div');sec.className='sec';sec.style.marginTop='6px';sec.textContent=h.name;w.appendChild(sec);
+    Object.entries(THREADS).filter(([id,t])=>t.house===h.id).forEach(([id,t])=>{
+      const last=t.msgs[t.msgs.length-1];
+      const b=document.createElement('button');b.className='lrow';
+      b.innerHTML=`<div class="hcircle" style="background:${t.vendor?'#3E7C4F':'#6E655A'};width:40px;height:40px">${t.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div class="tt">${t.name} <span class="small">· ${t.unit}</span></div>
+        <div class="ss">${last.text.slice(0,52)}${last.text.length>52?'…':''}</div></div>
+        ${t.unread?'<span class="dotunread"></span>':''}<span class="chev">›</span>`;
+      b.addEventListener('click',()=>openThread(id));w.appendChild(b);});
+  });
+}
+function openThread(id){
+  curThread=id;const t=THREADS[id];t.unread=false;
+  $('#thHouse').textContent=house().name==='Udell Duplex'&&t.house==='cottage'?'Garfield Park Cottage':(t.house==='udell'?'Udell Duplex':'Garfield Park Cottage');
+  $('#thUnit').textContent=t.unit;$('#thName').textContent=t.name;$('#thTitle').textContent=t.title;
+  renderThread();setTaken(false);go('thread');renderMsgs();
+}
+function renderThread(){
+  const t=THREADS[curThread],w=$('#threadBody');w.innerHTML='';
+  t.msgs.forEach(m=>{
+    const d=document.createElement('div');
+    if(m.from==='ai'){d.className='bub ai';d.innerHTML=`<span class="ailabel">Surely AI${m.note?' · '+m.note:''}</span>${m.text}<span class="tm">${m.tm}</span>`;}
+    else if(m.from==='me'){d.className='bub me';d.innerHTML=`<span class="melabel">You · via Surely number</span>${m.text}<span class="tm">${m.tm}</span>`;}
+    else{d.className='bub them';d.textContent=m.text;const tm=document.createElement('span');tm.className='tm';tm.textContent=m.tm;d.appendChild(tm);}
+    w.appendChild(d);});
+  const dr=$('#aiDraft');
+  if(t.draft){dr.classList.remove('hidden');$('#aiDraftText').textContent='“'+t.draft+'”';}
+  else dr.classList.add('hidden');
+}
+function setTaken(v){takenOver=v;$('#takebar').classList.toggle('taken',v);}
+$('#takeoverBtn').addEventListener('click',()=>{setTaken(true);$('#composeField').focus();toast('AI paused — you\'re texting as the Surely number');});
+$('#handbackBtn').addEventListener('click',()=>{setTaken(false);toast('AI resumed — watching the thread');});
+$('#sendBtn').addEventListener('click',sendMsg);
+$('#composeField').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+function sendMsg(){const f=$('#composeField'),v=f.value.trim();if(!v)return;
+  THREADS[curThread].msgs.push({from:'me',text:v,tm:'now'});f.value='';renderThread();}
+$('#draftApprove').addEventListener('click',()=>{document.querySelector('#needs [data-act="approve-rent"]')?.click();renderThread();});
+$('#draftThread').addEventListener('click',()=>expandCard('rent'));
+$('#rulesLink').addEventListener('click',()=>{
+  const h=HOUSES.find(x=>x.id===THREADS[curThread].house);
+  $('#rulesReadonly').innerHTML=h.rules.map(r=>`<div class="hrow"><div class="chk" style="background:var(--ai-tint);color:var(--ink)">§</div><div class="tx">${r}</div></div>`).join('');
+  openSheet('sheet-rules');});
+
+/* ================= Ticket ================= */
+function syncTicketBar(){
+  const c=state.needs.find(x=>x.id==='leak');
+  const bar=$('#ticketBar');
+  if(c&&c.state==='dispatching'){bar.querySelector('.row').classList.add('hidden');$('#ticketCallme').classList.add('hidden');$('#ticketUndo').classList.remove('hidden');}
+  else{bar.querySelector('.row').classList.remove('hidden');$('#ticketCallme').classList.remove('hidden');$('#ticketUndo').classList.add('hidden');}
+  if(!c||c.state==='resolved'){bar.innerHTML='<div class="sent-note">✓ Handled — Luis Herrera was dispatched.</div>';}
+}
+$('#ticketApprove').addEventListener('click',()=>{approveLeak();toast('Approved — vendor dispatched');});
+$('#ticketDecline').addEventListener('click',()=>{document.querySelector('#needs [data-act="decline"]')?.click();go('today');});
+$('#ticketCallme').addEventListener('click',()=>{$('#callmeNote').classList.add('on');toast('AI is calling you now');});
+$('#ticketUndoBtn').addEventListener('click',undoLeak);
+/* ================= Houses ================= */
+let detailHouse='udell';
+function renderHouses(){
+  const w=$('#houseList');w.innerHTML='';
+  HOUSES.forEach(h=>{
+    const units=UNITS.filter(u=>u.house===h.id);
+    const b=document.createElement('button');b.className='lrow';
+    b.innerHTML=`<div class="hcircle" style="background:${h.color}">${h.short}</div>
+      <div><div class="tt">${h.name}</div><div class="ss">${h.doors} · ${h.area}</div></div><span class="chev">›</span>`;
+    b.addEventListener('click',()=>openHouse(h.id));w.appendChild(b);});
+}
+function openHouse(id){
+  detailHouse=id;const h=HOUSES.find(x=>x.id===id);
+  $('#hdName').textContent=h.name;$('#hdTitle').textContent=h.name;
+  $('#hdSub').textContent=h.doors+' · '+h.area;
+  const ul=$('#unitList');ul.innerHTML='';
+  UNITS.filter(u=>u.house===id).forEach(u=>{
+    const d=document.createElement('div');d.className='lrow';d.style.cursor='default';
+    d.innerHTML=`<div><div class="tt">${u.unit} — ${u.tenant}</div>
+      <div class="ss">Lease: ${u.lease}</div></div>
+      <button class="pill" style="margin-left:auto;cursor:pointer" data-tix="${u.open}">${u.open} open ticket${u.open===1?'':'s'}</button>`;
+    d.querySelector('[data-tix]').addEventListener('click',e=>{e.stopPropagation();
+      if(+e.target.dataset.tix>0)go('ticket');else toast('No open tickets for this unit');});
+    ul.appendChild(d);});
+  renderRules();go('housedetail');
+}
+function renderRules(){
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $('#ruleList').innerHTML=h.rules.map(r=>`<div class="hrow"><div class="chk" style="background:var(--ai-tint);color:var(--ink)">§</div><div class="tx">${r}</div></div>`).join('');
+}
+$('#editRulesBtn').addEventListener('click',()=>{
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $('#editRulesSub').textContent=h.name+' — plain language. The AI reads these before every reply.';
+  $('#rulesEdit').innerHTML=h.rules.map((r,i)=>`<div class="field"><label>Rule ${i+1}</label><textarea data-ri="${i}">${r}</textarea></div>`).join('');
+  openSheet('sheet-editrules');});
+$('#saveRules').addEventListener('click',()=>{
+  const h=HOUSES.find(x=>x.id===detailHouse);
+  $$('#rulesEdit [data-ri]').forEach(t=>{h.rules[+t.dataset.ri]=t.value;});
+  renderRules();closeSheets();toast('House rules updated');});
+
+/* ================= Vendors ================= */
+function renderVendors(){
+  const w=$('#vendorList');w.innerHTML='';
+  VENDORS.forEach(v=>{
+    const d=document.createElement('div');d.className='lrow';d.style.cursor='default';
+    d.innerHTML=`<div class="hcircle" style="background:${v.color};width:40px;height:40px;font-size:13px">${v.init}</div>
+      <div><div class="tt">${v.name} <span class="pill ${v.role==='preferred'?'pref':''}">${v.role}</span></div>
+      <div class="ss">${v.trade} · <span class="money">${v.rate}</span> · ${v.props}</div></div>`;
+    const acts=document.createElement('div');acts.style.cssText='display:flex;gap:6px;margin-left:auto';
+    const call=document.createElement('button');call.className='btn ghost sm';call.textContent='Call';
+    call.addEventListener('click',()=>toast('Calling '+v.name+' from (317) 555-0148…'));
+    const text=document.createElement('button');text.className='btn ghost sm';text.textContent='Text';
+    text.addEventListener('click',()=>{$('#ntTo').value=v.name;openSheet('sheet-numtext');});
+    acts.appendChild(call);acts.appendChild(text);d.appendChild(acts);w.appendChild(d);});
+}
+$('#addVendorBtn').addEventListener('click',()=>openSheet('sheet-addvendor'));
+$$('#nvRole button').forEach(b=>b.addEventListener('click',()=>{$$('#nvRole button').forEach(x=>x.classList.remove('on'));b.classList.add('on');}));
+$('#nvSave').addEventListener('click',()=>{
+  const n=$('#nvName').value.trim()||'New Vendor';
+  VENDORS.push({name:n,trade:$('#nvTrade').value.trim()||'General',rate:$('#nvRate').value.trim()||'—',
+    role:$('#nvRole .on').textContent.toLowerCase(),props:house().name,init:n.split(' ').map(x=>x[0]).join('').slice(0,2),color:'#6E655A'});
+  ['nvName','nvTrade','nvPhone','nvRate'].forEach(id=>$('#'+id).value='');
+  renderVendors();closeSheets();toast(n+' added');});
+
+/* ================= Settings ================= */
+$('#limDown').addEventListener('click',()=>{state.limit=Math.max(50,state.limit-50);$('#limVal').textContent='$'+state.limit;});
+$('#limPlus').addEventListener('click',()=>{state.limit+=50;$('#limVal').textContent='$'+state.limit;});
+$('#qhSwitch').addEventListener('click',e=>e.target.classList.toggle('on'));
+$$('#toneSeg button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#toneSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const ex={'Warm & brief':'“Got it — I\'ll take care of it.”','Professional':'“Understood. I will arrange this promptly.”','Friendly neighbor':'“You got it, neighbor — on it!”'};
+  $('#toneExample').innerHTML='&ldquo;'+ex[b.textContent].slice(1);}));
+$('#replayPush').addEventListener('click',()=>{showPush();toast('Push demo replaying');});
+
+/* ================= Number tab ================= */
+let vmTimer=null;
+(function(){const w=$('#vmWave');for(let i=0;i<44;i++){const b=document.createElement('i');
+  b.style.height=(6+Math.round(Math.random()*26))+'px';w.appendChild(b);}})();
+$('#vmPlay').addEventListener('click',()=>{
+  const btn=$('#vmPlay');if(vmTimer){clearInterval(vmTimer);vmTimer=null;btn.innerHTML='&#9654;';$('#vmTime').textContent='0:42';return;}
+  let s=42;btn.innerHTML='&#10074;&#10074;';
+  vmTimer=setInterval(()=>{s--;$('#vmTime').textContent='0:'+String(s).padStart(2,'0');
+    if(s<=0){clearInterval(vmTimer);vmTimer=null;btn.innerHTML='&#9654;';$('#vmTime').textContent='0:42';}},1000);});
+$('#vmCallback').addEventListener('click',()=>toast('Calling Marcus from (317) 555-0148…'));
+$('#vmHandled').addEventListener('click',()=>{toast('Voicemail marked handled');});
+$('#numTextBtn').addEventListener('click',()=>openSheet('sheet-numtext'));
+$('#numCallBtn').addEventListener('click',()=>toast('Calling from your Surely number…'));
+$('#ntSend').addEventListener('click',()=>{
+  if(!$('#ntMsg').value.trim()){toast('Type a message first');return;}
+  $('#ntMsg').value='';closeSheets();toast('Sent from (317) 555-0148');});
+
+/* ================= Push banner demo (2-tap path) ================= */
+function showPush(){$('#push').classList.add('show');}
+$('#push').addEventListener('click',()=>{$('#push').classList.remove('show');expandCard('leak');});
+
+/* ================= Push lab (spike checklist, local stubs) ================= */
+const plab={perm:'default (stub)',sub:false,pushes:0};
+function plog(m,cls){const l=$('#plabLog');
+  if(l.querySelector('.dim'))l.innerHTML='';
+  const d=document.createElement('div');if(cls)d.className=cls;
+  const t=new Date();d.textContent=`${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}  ${m}`;
+  l.appendChild(d);l.scrollTop=l.scrollHeight;}
+function plabCheck(k){const el=$(`#plabChecks [data-k="${k}"]`);if(el)el.classList.add('done');}
+$('#openPushLab').addEventListener('click',()=>go('pushlab'));
+$('#pushlabBack').addEventListener('click',()=>go('settings'));
+$('#plabPermBtn').addEventListener('click',()=>{
+  let real='n/a';
+  try{if('Notification' in window&&Notification.requestPermission){Notification.requestPermission().then(r=>plog('real Notification.requestPermission() → '+r,'dim'));}else real='API unavailable on file://';}
+  catch(e){real='blocked here';}
+  plab.perm='granted (stub)';$('#plabPerm').textContent='granted (stub)';
+  $('#plabSubBtn').disabled=false;
+  plog('permission prompt shown (stubbed — real OS prompt needs https) → granted');
+  plog('real API check: '+real,'dim');plabCheck('perm');
+  $('#pushStatusLine').textContent='Permission granted — not subscribed yet';});
+$('#plabSubBtn').addEventListener('click',()=>{
+  plab.sub=!plab.sub;
+  $('#plabSub').textContent=plab.sub?'subscribed (stub endpoint)':'unsubscribed';
+  $('#plabSubBtn').textContent=plab.sub?'Unsubscribe':'Subscribe';
+  $('#plabSend').disabled=!plab.sub;
+  plog(plab.sub?'pushsubscriptionchange handled → endpoint stored (stub)':'unsubscribed → endpoint deleted (stub)');
+  $('#pushStatusLine').textContent=plab.sub?'Subscribed — pushes will arrive':'Not subscribed in this demo';
+  if(plab.sub)plabCheck('perm');});
+$('#plabSend').addEventListener('click',()=>{
+  plab.pushes++;$('#plabNotif').classList.add('show');
+  $('#plabWhen').textContent='now';
+  $('#plabBodyTap').disabled=false;$('#plabRepush').disabled=false;
+  plog(`push event → showNotification({tag:'card-leak', urgency:'high', actions:['approve','decline']})`);
+  plog('rendered natively: exactly 2 text-only buttons (icons ignored on Android) — visual check ✓','ok');
+  plabCheck('render');});
+$('#plabApprove').addEventListener('click',()=>{
+  plog(`notificationclick — event.action='approve'`);
+  plog(`POST /api/cards/leak/approve?sig=stub… → 200 (stub)`);
+  plog(`notification.close() — no window opened ✓ headless`,'ok');
+  $('#plabNotif').classList.remove('show');
+  approveLeak();plabCheck('headless');
+  toast('Approved from the notification — 1 tap');});
+$('#plabDecline').addEventListener('click',()=>{
+  plog(`notificationclick — event.action='decline'`);
+  plog(`POST /api/cards/leak/decline?sig=stub… → 200 (stub)`);
+  plog(`notification.close() — no window opened ✓ headless`,'ok');
+  $('#plabNotif').classList.remove('show');
+  const c=state.needs.find(x=>x.id==='leak');
+  if(c&&c.state==='open'){c.state='resolved';renderNeeds();pushHandled('Declined the leak repair dispatch.','No vendor was contacted. The ticket stays open in Messages.');}
+  plabCheck('headless');toast('Declined from the notification');});
+$('#plabBodyTap').addEventListener('click',()=>{
+  plog(`notificationclick — event.action='' (body tap)`);
+  plog(`clients.matchAll → openWindow('/today?card=leak')`);
+  $('#plabNotif').classList.remove('show');
+  plabCheck('deep');expandCard('leak');
+  plog('PWA focused at /today?card=leak — card expanded ✓','ok');});
+$('#plabRepush').addEventListener('click',()=>{
+  plab.pushes++;
+  $('#plabBody').textContent=`Leak under kitchen sink · Unit A — Luis Herrera (preferred). Updated just now: estimate confirmed $180–$240.`;
+  $('#plabWhen').textContent='now';
+  $('#plabNotif').classList.add('show');
+  plog(`re-push showNotification({tag:'card-leak'}) → replaced in place, no stacking ✓`,'ok');
+  plabCheck('stale');});
+
+/* ================= init ================= */
+renderRail();renderCtx();renderNeeds();renderHandled();renderMsgs();renderHouses();renderVendors();
+setTimeout(()=>$('#splash').classList.add('hide'),900);
+setTimeout(showPush,2400);
+</script>
+</body>
+</html>
